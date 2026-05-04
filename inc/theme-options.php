@@ -14,32 +14,34 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 function vaxx_option_defaults() {
 	return array(
-		// Contato
-		'whatsapp_numero'  => '5547999999999',
-		'whatsapp_display' => '(47) 99999-9999',
-		'telefone'         => '(47) 3012-3456',
-		'email_comercial'  => 'comercial@vaxx.com.br',
-		'email_suporte'    => 'suporte@vaxx.com.br',
-		'email_dpo'        => 'dpo@vaxx.com.br',
+		// Contato — vazios por default. O cliente preenche em Aparência → Personalizar.
+		// Sem fallback fake pra evitar exibir telefone/e-mail/WhatsApp inválido em produção.
+		'whatsapp_numero'  => '',
+		'whatsapp_display' => '',
+		'telefone'         => '',
+		'email_comercial'  => '',
+		'email_suporte'    => '',
+		'email_dpo'        => '',
 		'cta_pill_curto'   => 'Fale conosco',
 		'cta_pill_longo'   => 'Fale com quem fabricou',
-		// Empresa
+		// Empresa — strings da marca podem vir como default (são fixas, não placeholder).
+		// Dados que mudam por loja/CNPJ ficam vazios.
 		'razao_social'     => 'Grupo Delva — Indústria Metálica Ltda.',
 		'nome_fantasia'    => 'VAXX',
-		'cnpj'             => '00.000.000/0001-00',
+		'cnpj'             => '',
 		'desde_ano'        => '2008',
-		'endereco_rua'     => 'Rua Walter Marquardt, 1234',
-		'endereco_bairro'  => 'Distrito Industrial',
+		'endereco_rua'     => '',
+		'endereco_bairro'  => '',
 		'endereco_cidade'  => 'Jaraguá do Sul / SC',
-		'endereco_cep'     => '89254-430',
+		'endereco_cep'     => '',
 		'slogan'           => 'Feito por quem treina. Pra quem treina.',
 		'tagline_footer'   => 'Grupo Delva · Desde 2008',
 		'desc_footer'      => 'Linha completa de equipamentos para academia, fabricada em Jaraguá do Sul por quem treina todo dia. Direto da fábrica, sem intermediário.',
-		// Redes sociais
-		'social_instagram' => 'https://instagram.com/vaxx',
-		'social_youtube'   => 'https://youtube.com/@vaxx',
-		'social_facebook'  => 'https://facebook.com/vaxx',
-		'social_linkedin'  => 'https://linkedin.com/company/vaxx',
+		// Redes sociais — vazios por default. Ícones só aparecem se URL preenchida.
+		'social_instagram' => '',
+		'social_youtube'   => '',
+		'social_facebook'  => '',
+		'social_linkedin'  => '',
 		// Topbar
 		'topbar_text_1'    => 'FEITO POR QUEM TREINA',
 		'topbar_text_2'    => 'PRA QUEM TREINA',
@@ -66,12 +68,12 @@ function vaxx_customize_register( $wp_customize ) {
 	) );
 
 	$contact_fields = array(
-		'whatsapp_numero'  => array( 'label' => 'Número WhatsApp (formato E.164, sem sinais)', 'default' => '5547999999999', 'type' => 'text' ),
-		'whatsapp_display' => array( 'label' => 'WhatsApp formatado (exibição)',                'default' => '(47) 99999-9999', 'type' => 'text' ),
-		'telefone'         => array( 'label' => 'Telefone fixo (com DDD)',                      'default' => '(47) 3012-3456',  'type' => 'text' ),
-		'email_comercial'  => array( 'label' => 'E-mail comercial',                             'default' => 'comercial@vaxx.com.br', 'type' => 'email' ),
-		'email_suporte'    => array( 'label' => 'E-mail suporte',                               'default' => 'suporte@vaxx.com.br', 'type' => 'email' ),
-		'email_dpo'        => array( 'label' => 'E-mail DPO (LGPD)',                            'default' => 'dpo@vaxx.com.br', 'type' => 'email' ),
+		'whatsapp_numero'  => array( 'label' => 'Número WhatsApp (formato E.164, sem sinais)', 'default' => '', 'type' => 'text' ),
+		'whatsapp_display' => array( 'label' => 'WhatsApp formatado (exibição)',                'default' => '', 'type' => 'text' ),
+		'telefone'         => array( 'label' => 'Telefone fixo (com DDD)',                      'default' => '',  'type' => 'text' ),
+		'email_comercial'  => array( 'label' => 'E-mail comercial',                             'default' => '', 'type' => 'email' ),
+		'email_suporte'    => array( 'label' => 'E-mail suporte',                               'default' => '', 'type' => 'email' ),
+		'email_dpo'        => array( 'label' => 'E-mail DPO (LGPD)',                            'default' => '', 'type' => 'email' ),
 		'cta_pill_curto'   => array( 'label' => 'Texto CTA pequeno (header mobile)',            'default' => 'Fale conosco',   'type' => 'text' ),
 		'cta_pill_longo'   => array( 'label' => 'Texto CTA grande (header desktop)',            'default' => 'Fale com quem fabricou', 'type' => 'text' ),
 	);
@@ -98,12 +100,12 @@ function vaxx_customize_register( $wp_customize ) {
 	$empresa_fields = array(
 		'razao_social'   => array( 'label' => 'Razão social',        'default' => 'Grupo Delva — Indústria Metálica Ltda.', 'type' => 'text' ),
 		'nome_fantasia'  => array( 'label' => 'Nome fantasia',       'default' => 'VAXX', 'type' => 'text' ),
-		'cnpj'           => array( 'label' => 'CNPJ',                'default' => '00.000.000/0001-00', 'type' => 'text' ),
+		'cnpj'           => array( 'label' => 'CNPJ',                'default' => '', 'type' => 'text' ),
 		'desde_ano'      => array( 'label' => 'Ano de fundação',     'default' => '2008', 'type' => 'text' ),
-		'endereco_rua'   => array( 'label' => 'Rua + número',        'default' => 'Rua Walter Marquardt, 1234', 'type' => 'text' ),
-		'endereco_bairro'=> array( 'label' => 'Bairro',              'default' => 'Distrito Industrial', 'type' => 'text' ),
+		'endereco_rua'   => array( 'label' => 'Rua + número',        'default' => '', 'type' => 'text' ),
+		'endereco_bairro'=> array( 'label' => 'Bairro',              'default' => '', 'type' => 'text' ),
 		'endereco_cidade'=> array( 'label' => 'Cidade / UF',         'default' => 'Jaraguá do Sul / SC', 'type' => 'text' ),
-		'endereco_cep'   => array( 'label' => 'CEP',                 'default' => '89254-430', 'type' => 'text' ),
+		'endereco_cep'   => array( 'label' => 'CEP',                 'default' => '', 'type' => 'text' ),
 		'slogan'         => array( 'label' => 'Slogan',              'default' => 'Feito por quem treina. Pra quem treina.', 'type' => 'text' ),
 		'tagline_footer' => array( 'label' => 'Tagline rodapé',      'default' => 'Grupo Delva · Desde 2008', 'type' => 'text' ),
 		'desc_footer'    => array( 'label' => 'Descrição rodapé',    'default' => 'Linha completa de equipamentos para academia, fabricada em Jaraguá do Sul por quem treina todo dia. Direto da fábrica, sem intermediário.', 'type' => 'textarea' ),
@@ -129,10 +131,10 @@ function vaxx_customize_register( $wp_customize ) {
 	) );
 
 	$social_fields = array(
-		'social_instagram' => array( 'label' => 'Instagram (URL completa)', 'default' => 'https://instagram.com/vaxx' ),
-		'social_youtube'   => array( 'label' => 'YouTube (URL completa)',   'default' => 'https://youtube.com/@vaxx' ),
-		'social_facebook'  => array( 'label' => 'Facebook (URL completa)',  'default' => 'https://facebook.com/vaxx' ),
-		'social_linkedin'  => array( 'label' => 'LinkedIn (URL completa)',  'default' => 'https://linkedin.com/company/vaxx' ),
+		'social_instagram' => array( 'label' => 'Instagram (URL completa)', 'default' => '' ),
+		'social_youtube'   => array( 'label' => 'YouTube (URL completa)',   'default' => '' ),
+		'social_facebook'  => array( 'label' => 'Facebook (URL completa)',  'default' => '' ),
+		'social_linkedin'  => array( 'label' => 'LinkedIn (URL completa)',  'default' => '' ),
 	);
 
 	foreach ( $social_fields as $slug => $opts ) {
@@ -188,7 +190,8 @@ add_action( 'customize_register', 'vaxx_customize_register' );
  * Helper: retorna link WhatsApp completo com texto pré-preenchido opcional.
  */
 function vaxx_wa_link( $text = 'Oi! Vim pelo site da VAXX' ) {
-	$num = vaxx_get_option( 'whatsapp_numero', '5547999999999' );
+	$num = vaxx_get_option( 'whatsapp_numero', '' );
+	if ( ! $num ) return '';
 	return 'https://wa.me/' . $num . '?text=' . rawurlencode( $text );
 }
 

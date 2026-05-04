@@ -26,6 +26,37 @@ $initials     = strtoupper( mb_substr( $current_user->first_name ?: $current_use
 $order_count  = wc_get_customer_order_count( $current_user->ID );
 $member_since = date_i18n( 'm/Y', strtotime( $current_user->user_registered ) );
 
+// Dados reais do customer Woo
+$customer       = new WC_Customer( $current_user->ID );
+$billing_phone  = $customer->get_billing_phone();
+$billing_first  = $customer->get_billing_first_name();
+$billing_last   = $customer->get_billing_last_name();
+$user_full_name = trim( $billing_first . ' ' . $billing_last ) ?: $current_user->display_name;
+$user_cpf       = get_user_meta( $current_user->ID, 'billing_cpf', true );
+$user_birthdate = get_user_meta( $current_user->ID, 'billing_birthdate', true );
+$user_gender    = get_user_meta( $current_user->ID, 'billing_gender', true );
+
+// Endereços (billing + shipping) — montagem das linhas
+$ba1 = $customer->get_billing_address_1();
+$ba_num = get_user_meta( $current_user->ID, 'billing_number', true );
+$ba_neigh = get_user_meta( $current_user->ID, 'billing_neighborhood', true );
+$ba_city = $customer->get_billing_city();
+$ba_state = $customer->get_billing_state();
+$ba_pc = $customer->get_billing_postcode();
+$has_billing = $ba1 || $ba_pc;
+
+$sa1 = $customer->get_shipping_address_1();
+$sa_num = get_user_meta( $current_user->ID, 'shipping_number', true );
+$sa_neigh = get_user_meta( $current_user->ID, 'shipping_neighborhood', true );
+$sa_city = $customer->get_shipping_city();
+$sa_state = $customer->get_shipping_state();
+$sa_pc = $customer->get_shipping_postcode();
+$has_shipping = $sa1 || $sa_pc;
+$shipping_differs_billing = $has_shipping && ( $sa1 !== $ba1 || $sa_pc !== $ba_pc );
+
+// Cartões salvos (tokens WC)
+$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $current_user->ID );
+
 // Contagem de leads de aluguel do usuário (match por e-mail)
 $alug_count = 0;
 if ( $current_user->user_email ) {
@@ -174,79 +205,61 @@ if ( $current_user->user_email ) {
           </div>
         </div>
 
-        <div class="mc-favorites">
-          <div class="mc-fav-card">
-            <button type="button" class="mc-fav-remove" aria-label="Remover dos favoritos">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </button>
-            <a href="#" class="prod-card">
-              <div class="prod-card__media">
-                <span class="prod-card__line-badge">Articulados</span>
-                <span class="prod-card__regulagem">1,55–1,95</span>
-                <img src="https://images.unsplash.com/photo-1591741535018-d042766c62eb?auto=format&fit=crop&w=900&q=75" onerror="this.onerror=null;this.src='https://picsum.photos/seed/fav-desenv/900/675?grayscale'" alt="Desenvolvimento Articulado">
-              </div>
-              <div class="prod-card__body">
-                <h3 class="prod-card__title">Desenvolvimento Articulado</h3>
-                <div class="prod-card__tags">
-                  <span class="prod-card__tag">Ombros</span>
-                  <span class="prod-card__tag">Deltoides</span>
-                </div>
-                <div class="prod-card__cta">
-                  <span class="prod-card__cta-text">Ver produto</span>
-                  <span class="prod-card__cta-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-              </div>
-            </a>
-          </div>
+        <?php
+        // Lista favoritos do usuário a partir do user meta `vaxx_favoritos` (array de product IDs).
+        // Se o cliente integrar plugin de wishlist no futuro, basta apontar o filtro `vaxx_user_favorites_ids` pra fonte real.
+        $fav_ids = apply_filters( 'vaxx_user_favorites_ids', (array) get_user_meta( $current_user->ID, 'vaxx_favoritos', true ), $current_user->ID );
+        $fav_ids = array_filter( array_map( 'intval', $fav_ids ) );
+        ?>
 
-          <div class="mc-fav-card">
-            <button type="button" class="mc-fav-remove" aria-label="Remover dos favoritos">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </button>
-            <a href="#" class="prod-card">
-              <div class="prod-card__media">
-                <span class="prod-card__line-badge">Articulados</span>
-                <span class="prod-card__regulagem">1,55–1,95</span>
-                <img src="https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=900&q=75" onerror="this.onerror=null;this.src='https://picsum.photos/seed/fav-peck/900/675?grayscale'" alt="Peck Deck Articulado">
-              </div>
-              <div class="prod-card__body">
-                <h3 class="prod-card__title">Peck Deck Articulado</h3>
-                <div class="prod-card__tags">
-                  <span class="prod-card__tag">Peito</span>
-                  <span class="prod-card__tag">Ombro</span>
-                </div>
-                <div class="prod-card__cta">
-                  <span class="prod-card__cta-text">Ver produto</span>
-                  <span class="prod-card__cta-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-              </div>
-            </a>
+        <?php if ( empty( $fav_ids ) ) : ?>
+          <div class="mc-empty">
+            <div class="mc-empty__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <h3 class="mc-empty__title">Nenhum favorito ainda</h3>
+            <p class="mc-empty__desc">Marque produtos com o ícone de coração na página do produto pra encontrá-los aqui.</p>
+            <a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="mc-empty__cta">Ver catálogo</a>
           </div>
-
-          <div class="mc-fav-card">
-            <button type="button" class="mc-fav-remove" aria-label="Remover dos favoritos">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </button>
-            <a href="#" class="prod-card">
-              <div class="prod-card__media">
-                <span class="prod-card__line-badge">Articulados</span>
-                <span class="prod-card__regulagem">1,55–1,95</span>
-                <img src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=900&q=75" onerror="this.onerror=null;this.src='https://picsum.photos/seed/fav-remada/900/675?grayscale'" alt="Remada Baixa Articulada">
+        <?php else : ?>
+          <div class="mc-favorites">
+            <?php foreach ( $fav_ids as $fav_id ) :
+              $fav_product = wc_get_product( $fav_id );
+              if ( ! $fav_product || ! $fav_product->is_visible() ) continue;
+              $fav_thumb = get_the_post_thumbnail_url( $fav_id, 'vaxx-prod-card' ) ?: ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'vaxx-prod-card' ) : '' );
+              $fav_lines = wp_get_post_terms( $fav_id, 'product_line' );
+              $fav_line  = $fav_lines && ! is_wp_error( $fav_lines ) ? $fav_lines[0]->name : '';
+              $fav_groups = wp_get_post_terms( $fav_id, 'muscle_group' );
+              $has_reg   = (bool) get_post_meta( $fav_id, 'vaxx_regulagem_real', true );
+              $reg_val   = get_post_meta( $fav_id, 'vaxx_regulagem', true ) ?: '1,55–1,95';
+            ?>
+              <div class="mc-fav-card">
+                <button type="button" class="mc-fav-remove" data-product-id="<?php echo (int) $fav_id; ?>" aria-label="Remover dos favoritos">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
+                <a href="<?php echo esc_url( $fav_product->get_permalink() ); ?>" class="prod-card">
+                  <div class="prod-card__media">
+                    <?php if ( $fav_line ) : ?><span class="prod-card__line-badge"><?php echo esc_html( $fav_line ); ?></span><?php endif; ?>
+                    <?php if ( $has_reg ) : ?><span class="prod-card__regulagem"><?php echo esc_html( $reg_val ); ?></span><?php endif; ?>
+                    <?php if ( $fav_thumb ) : ?><img src="<?php echo esc_url( $fav_thumb ); ?>" alt="<?php echo esc_attr( $fav_product->get_name() ); ?>" loading="lazy"><?php endif; ?>
+                  </div>
+                  <div class="prod-card__body">
+                    <h3 class="prod-card__title"><?php echo esc_html( $fav_product->get_name() ); ?></h3>
+                    <?php if ( $fav_groups && ! is_wp_error( $fav_groups ) ) : ?>
+                    <div class="prod-card__tags">
+                      <?php foreach ( $fav_groups as $g ) : ?><span class="prod-card__tag"><?php echo esc_html( $g->name ); ?></span><?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                    <div class="prod-card__cta">
+                      <span class="prod-card__cta-text">Ver produto</span>
+                      <span class="prod-card__cta-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                    </div>
+                  </div>
+                </a>
               </div>
-              <div class="prod-card__body">
-                <h3 class="prod-card__title">Remada Baixa Articulada</h3>
-                <div class="prod-card__tags">
-                  <span class="prod-card__tag">Costas</span>
-                  <span class="prod-card__tag">Trapézio</span>
-                </div>
-                <div class="prod-card__cta">
-                  <span class="prod-card__cta-text">Ver produto</span>
-                  <span class="prod-card__cta-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-              </div>
-            </a>
+            <?php endforeach; ?>
           </div>
-        </div>
+        <?php endif; ?>
       </section>
 
       <!-- VIEW: ENDEREÇOS -->
@@ -262,47 +275,65 @@ if ( $current_user->user_email ) {
           </button>
         </div>
 
+        <?php if ( ! $has_billing && ! $has_shipping ) : ?>
+          <div class="mc-empty">
+            <div class="mc-empty__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <h3 class="mc-empty__title">Nenhum endereço cadastrado</h3>
+            <p class="mc-empty__desc">Adicione um endereço pra agilizar o checkout dos seus pedidos.</p>
+            <a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', 'billing', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="mc-empty__cta">Adicionar endereço</a>
+          </div>
+        <?php else : ?>
         <div class="mc-addresses">
+          <?php if ( $has_billing ) :
+            $billing_linha1 = trim( $ba1 . ( $ba1 && $ba_num ? ', ' : '' ) . $ba_num . ( ( $ba1 || $ba_num ) && $ba_neigh ? ' — ' : '' ) . $ba_neigh );
+            $billing_linha2 = trim( $ba_city . ( $ba_city && $ba_state ? '/' . $ba_state : ( $ba_state ?: '' ) ) );
+          ?>
           <article class="mc-address is-default">
             <div class="mc-address__head">
-              <span class="mc-address__label">Casa</span>
+              <span class="mc-address__label">Cobrança</span>
               <span class="mc-address__default-badge">Padrão</span>
             </div>
             <p class="mc-address__body">
-              <strong>Rafael Miguel</strong><br>
-              Rua Walter Marquardt, 1234 — Apto 302<br>
-              Distrito Industrial · Jaraguá do Sul/SC<br>
-              CEP 89254-430
+              <strong><?php echo esc_html( $user_full_name ); ?></strong><br>
+              <?php if ( $billing_linha1 ) : ?><?php echo esc_html( $billing_linha1 ); ?><br><?php endif; ?>
+              <?php if ( $billing_linha2 ) : ?><?php echo esc_html( $billing_linha2 ); ?><br><?php endif; ?>
+              <?php if ( $ba_pc ) : ?>CEP <?php echo esc_html( $ba_pc ); ?><?php endif; ?>
             </p>
             <div class="mc-address__actions">
-              <button type="button" class="mc-address__action">
+              <a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', 'billing', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="mc-address__action">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Editar
-              </button>
-              <button type="button" class="mc-address__action mc-address__action--danger">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                Remover
-              </button>
+              </a>
             </div>
           </article>
+          <?php endif; ?>
 
+          <?php if ( $shipping_differs_billing ) :
+            $shipping_first = $customer->get_shipping_first_name();
+            $shipping_last  = $customer->get_shipping_last_name();
+            $shipping_name  = trim( $shipping_first . ' ' . $shipping_last ) ?: $user_full_name;
+            $shipping_linha1 = trim( $sa1 . ( $sa1 && $sa_num ? ', ' : '' ) . $sa_num . ( ( $sa1 || $sa_num ) && $sa_neigh ? ' — ' : '' ) . $sa_neigh );
+            $shipping_linha2 = trim( $sa_city . ( $sa_city && $sa_state ? '/' . $sa_state : ( $sa_state ?: '' ) ) );
+          ?>
           <article class="mc-address">
             <div class="mc-address__head">
-              <span class="mc-address__label">Academia</span>
+              <span class="mc-address__label">Entrega</span>
             </div>
             <p class="mc-address__body">
-              <strong>Ruch Studios Fitness</strong><br>
-              Av. Getúlio Vargas, 567 — Sala 1<br>
-              Centro · Joinville/SC<br>
-              CEP 89201-000
+              <strong><?php echo esc_html( $shipping_name ); ?></strong><br>
+              <?php if ( $shipping_linha1 ) : ?><?php echo esc_html( $shipping_linha1 ); ?><br><?php endif; ?>
+              <?php if ( $shipping_linha2 ) : ?><?php echo esc_html( $shipping_linha2 ); ?><br><?php endif; ?>
+              <?php if ( $sa_pc ) : ?>CEP <?php echo esc_html( $sa_pc ); ?><?php endif; ?>
             </p>
             <div class="mc-address__actions">
-              <button type="button" class="mc-address__action">Definir padrão</button>
-              <button type="button" class="mc-address__action">Editar</button>
-              <button type="button" class="mc-address__action mc-address__action--danger">Remover</button>
+              <a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', 'shipping', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="mc-address__action">Editar</a>
             </div>
           </article>
+          <?php endif; ?>
         </div>
+        <?php endif; ?>
       </section>
 
       <!-- VIEW: MEUS DADOS -->
@@ -314,44 +345,46 @@ if ( $current_user->user_email ) {
           </div>
         </div>
 
-        <div class="mc-data">
+        <form method="post" class="mc-data" action="<?php echo esc_url( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ); ?>">
           <div class="mc-data__grid">
             <div class="field">
               <label for="mc-name">Nome completo</label>
-              <input type="text" id="mc-name" value="Rafael Miguel Oliveira">
+              <input type="text" id="mc-name" name="account_display_name" value="<?php echo esc_attr( $user_full_name ); ?>" placeholder="Como aparece nos pedidos">
             </div>
             <div class="field">
               <label for="mc-email">E-mail</label>
-              <input type="email" id="mc-email" value="rafael@ruch.com.br">
+              <input type="email" id="mc-email" name="account_email" value="<?php echo esc_attr( $current_user->user_email ); ?>" placeholder="seu@email.com">
             </div>
             <div class="field">
               <label for="mc-cpf">CPF</label>
-              <input type="text" id="mc-cpf" value="000.000.000-00">
+              <input type="text" id="mc-cpf" name="billing_cpf" value="<?php echo esc_attr( $user_cpf ); ?>" placeholder="000.000.000-00">
             </div>
             <div class="field">
               <label for="mc-phone">Telefone</label>
-              <input type="tel" id="mc-phone" value="(47) 99999-9999">
+              <input type="tel" id="mc-phone" name="billing_phone" value="<?php echo esc_attr( $billing_phone ); ?>" placeholder="(00) 00000-0000">
             </div>
             <div class="field">
               <label for="mc-birth">Data de nascimento</label>
-              <input type="date" id="mc-birth" value="1990-05-15">
+              <input type="date" id="mc-birth" name="billing_birthdate" value="<?php echo esc_attr( $user_birthdate ); ?>">
             </div>
             <div class="field">
               <label for="mc-gender">Gênero (opcional)</label>
-              <select id="mc-gender">
-                <option value="">Prefiro não informar</option>
-                <option value="m" selected>Masculino</option>
-                <option value="f">Feminino</option>
-                <option value="nb">Não-binário</option>
-                <option value="o">Outro</option>
+              <select id="mc-gender" name="billing_gender">
+                <option value=""<?php selected( $user_gender, '' ); ?>>Prefiro não informar</option>
+                <option value="m"<?php selected( $user_gender, 'm' ); ?>>Masculino</option>
+                <option value="f"<?php selected( $user_gender, 'f' ); ?>>Feminino</option>
+                <option value="nb"<?php selected( $user_gender, 'nb' ); ?>>Não-binário</option>
+                <option value="o"<?php selected( $user_gender, 'o' ); ?>>Outro</option>
               </select>
             </div>
           </div>
 
           <div class="mc-data__actions">
-            <button type="button" class="mc-data__save">Salvar alterações</button>
+            <?php wp_nonce_field( 'save_account_details', 'save-account-details-nonce' ); ?>
+            <input type="hidden" name="action" value="save_account_details">
+            <button type="submit" class="mc-data__save">Salvar alterações</button>
           </div>
-        </div>
+        </form>
       </section>
 
       <!-- VIEW: SEGURANÇA -->
@@ -430,6 +463,7 @@ if ( $current_user->user_email ) {
             </div>
           </div>
 
+          <?php if ( $billing_phone ) : ?>
           <div class="mc-sec-block">
             <h3 class="mc-sec-block__title">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -439,14 +473,15 @@ if ( $current_user->user_email ) {
             <div class="mc-toggle-row">
               <div class="mc-toggle-row__text">
                 <strong>2FA por SMS</strong>
-                <small>Código no número (47) 99999-9999</small>
+                <small>Código no número <?php echo esc_html( $billing_phone ); ?></small>
               </div>
               <label class="mc-toggle">
-                <input type="checkbox" id="mc-2fa">
+                <input type="checkbox" id="mc-2fa"<?php checked( get_user_meta( $current_user->ID, 'vaxx_2fa_sms', true ), '1' ); ?>>
                 <span class="mc-toggle__track" aria-hidden="true"></span>
               </label>
             </div>
           </div>
+          <?php endif; ?>
 
           <div class="mc-sec-block">
             <h3 class="mc-sec-block__title">
@@ -454,16 +489,29 @@ if ( $current_user->user_email ) {
               Cartões salvos
             </h3>
             <p class="mc-sec-block__desc">Tokenizados com criptografia PCI-DSS · nunca armazenamos o número completo.</p>
-            <div class="mc-card">
-              <div class="mc-card__brand">VISA</div>
-              <div class="mc-card__info">
-                <span class="mc-card__number">•••• •••• •••• 4242</span>
-                <span class="mc-card__meta">Rafael M. Oliveira · Vence 08/2028</span>
+
+            <?php if ( empty( $payment_tokens ) ) : ?>
+              <p class="mc-sec-block__empty">Você ainda não tem cartões salvos. Eles aparecem aqui após a primeira compra com cartão.</p>
+            <?php else : ?>
+              <?php foreach ( $payment_tokens as $token ) :
+                if ( ! ( $token instanceof WC_Payment_Token_CC ) ) continue;
+                $brand = strtoupper( $token->get_card_type() );
+                $last4 = $token->get_last4();
+                $exp_m = str_pad( $token->get_expiry_month(), 2, '0', STR_PAD_LEFT );
+                $exp_y = $token->get_expiry_year();
+              ?>
+              <div class="mc-card">
+                <div class="mc-card__brand"><?php echo esc_html( $brand ); ?></div>
+                <div class="mc-card__info">
+                  <span class="mc-card__number">•••• •••• •••• <?php echo esc_html( $last4 ); ?></span>
+                  <span class="mc-card__meta">Vence <?php echo esc_html( $exp_m . '/' . $exp_y ); ?></span>
+                </div>
+                <a href="<?php echo esc_url( wc_get_endpoint_url( 'payment-methods', '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="mc-card__remove" aria-label="Gerenciar cartão">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </a>
               </div>
-              <button type="button" class="mc-card__remove" aria-label="Remover cartão">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
 
         </div>

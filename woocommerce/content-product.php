@@ -36,8 +36,8 @@ $reg_val = get_post_meta( $product->get_id(), 'vaxx_regulagem', true ) ?: '1,55â
 
 // Imagem destacada
 $thumb = get_the_post_thumbnail_url( $product->get_id(), 'vaxx-prod-card' );
-if ( ! $thumb ) {
-	$thumb = 'https://picsum.photos/seed/' . esc_attr( $product->get_slug() ) . '/900/675?grayscale';
+if ( ! $thumb && function_exists( 'wc_placeholder_img_src' ) ) {
+	$thumb = wc_placeholder_img_src( 'vaxx-prod-card' );
 }
 ?>
 <a href="<?php echo esc_url( $product->get_permalink() ); ?>"

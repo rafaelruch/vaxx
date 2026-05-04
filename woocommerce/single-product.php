@@ -82,7 +82,7 @@ while ( have_posts() ) :
 					<?php
 					$main_src = $main_img_id
 						? wp_get_attachment_image_url( $main_img_id, 'vaxx-prod-gallery' )
-						: 'https://picsum.photos/seed/' . esc_attr( $product->get_slug() ) . '/1200/900?grayscale';
+						: ( function_exists( 'wc_placeholder_img_src' ) ? wc_placeholder_img_src( 'vaxx-prod-gallery' ) : '' );
 					?>
 					<img id="galleryMainImg" src="<?php echo esc_url( $main_src ); ?>" alt="<?php echo esc_attr( $product->get_name() ); ?>">
 					<?php if ( count( $gallery_ids ) > 1 ) : ?>
