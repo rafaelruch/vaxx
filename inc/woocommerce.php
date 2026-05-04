@@ -364,6 +364,28 @@ function vaxx_render_produtos_marker( $content ) {
 add_filter( 'the_content', 'vaxx_render_produtos_marker', 5 );
 
 /**
+ * Força Classic Cart/Checkout independente do que está no post_content.
+ *
+ * Por que: o tema VAXX foi todo construído sobre os templates clássicos
+ * (woocommerce/checkout/form-checkout.php, review-order.php, mini-cart drawer
+ * custom). O Cart Block (Gutenberg) traz por padrão o "Empty Cart Block" com
+ * uma seção "New in store" que injeta produtos sugeridos, ignora os overrides
+ * PHP do tema e quebra o flow do checkout custom.
+ *
+ * O `[woocommerce_checkout]` shortcode internamente roteia order-received,
+ * order-pay e thankyou pelos templates corretos — não precisa condicionar.
+ */
+function vaxx_force_classic_cart_checkout( $content ) {
+	if ( ! function_exists( 'is_cart' ) || ! function_exists( 'is_checkout' ) ) return $content;
+	if ( ! in_the_loop() || ! is_main_query() ) return $content;
+
+	if ( is_cart() )     return do_shortcode( '[woocommerce_cart]' );
+	if ( is_checkout() ) return do_shortcode( '[woocommerce_checkout]' );
+	return $content;
+}
+add_filter( 'the_content', 'vaxx_force_classic_cart_checkout', 100 );
+
+/**
  * Cria atributo global "pa_regulagem-real" (sim/não) no Woo.
  * Executado uma vez via hook after_switch_theme.
  */
