@@ -3,8 +3,9 @@
    Form de dados + resumo do carrinho + tela de confirmação.
    ═══════════════════════════════════════════════════════════════════ */
 
-.page-id-orcamento .entry-content { padding-top: 0; }
-
+/* Página /orcamento/ herda o offset de header via body.vx-has-injected-bc
+   (em global.css), juntamente com o breadcrumb canônico injetado antes
+   do shortcode. O .vx-orc adiciona só padding interno próprio. */
 .vx-orc {
 	background: var(--vaxx-preto, #0A0A0A);
 	color: var(--vaxx-branco, #fff);

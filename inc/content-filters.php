@@ -42,6 +42,7 @@ function vaxx_pages_with_injected_breadcrumb() {
 		'trocas-e-devolucoes'     => 'Trocas e devoluções',
 		'termos-de-uso'           => 'Termos de uso',
 		'politica-de-privacidade' => 'Política de privacidade',
+		'orcamento'               => 'Solicitar orçamento',
 	);
 }
 
