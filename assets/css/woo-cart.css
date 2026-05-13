@@ -260,9 +260,9 @@
 
 /* ─── Actions row (coupon + atualizar) ─────────────────────────────────── */
 .vx-cart__actions-row {
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 8px;
 	margin-top: 20px;
 	padding: 20px;
 	background: var(--vaxx-carvao);
@@ -271,14 +271,15 @@
 }
 @media (min-width: 768px) {
 	.vx-cart__actions-row {
-		flex-direction: row;
-		align-items: flex-end;
-		justify-content: space-between;
+		grid-template-columns: 1fr auto;
+		grid-auto-flow: column;
+		align-items: end;
+		gap: 8px;
 		padding: 24px;
 	}
 }
 
-.vx-cart__coupon { display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1; }
+.vx-cart__coupon { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .vx-cart__coupon-label {
 	font-family: var(--font-display);
 	font-size: 11px;
@@ -294,11 +295,12 @@
 	background: var(--vaxx-preto);
 	border: 1px solid rgba(255,255,255,0.16);
 	color: var(--vaxx-branco);
-	padding: 10px 14px;
+	padding: 0 14px;
 	border-radius: 8px;
-	min-height: 44px;
+	height: 44px;
 	font-family: var(--font-body);
 	font-size: 14px;
+	box-sizing: border-box;
 }
 .vx-cart__coupon-input::placeholder { color: rgba(255,255,255,0.3); letter-spacing: 0.08em; }
 .vx-cart__coupon-input:focus { outline: none; border-color: var(--vaxx-lima); }
@@ -310,6 +312,7 @@
 	border: 1px solid rgba(255,255,255,0.22);
 	padding: 10px 20px;
 	border-radius: 999px;
+	height: 44px;
 	min-height: 44px;
 	font-family: var(--font-display);
 	font-weight: 900;
@@ -320,7 +323,10 @@
 	transition: all 180ms var(--ease);
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 8px;
+	flex: 0 0 auto;
+	white-space: nowrap;
 }
 .vx-cart__coupon-submit:hover,
 .vx-cart__update:hover { border-color: var(--vaxx-lima); color: var(--vaxx-lima); }

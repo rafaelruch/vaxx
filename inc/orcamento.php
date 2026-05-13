@@ -461,6 +461,8 @@ function vaxx_orcamento_err_msg( $key ) {
 		'user'    => 'Não foi possível criar sua conta. Verifique se você já tem cadastro com este e-mail.',
 		'order'   => 'Não conseguimos registrar o orçamento. Tente novamente em instantes.',
 		'nonce'   => 'Sessão expirada. Volte ao formulário e envie de novo.',
+		'cart'    => 'Seu carrinho está vazio. Inclua produtos antes de solicitar o orçamento.',
+		'wc'      => 'Integração de e-commerce indisponível. Tente novamente em instantes.',
 	);
 	return $map[ $key ] ?? 'Erro no envio. Tente novamente.';
 }
@@ -470,11 +472,30 @@ function vaxx_orcamento_err_msg( $key ) {
  */
 function vaxx_handle_orcamento_submit() {
 	if ( ! isset( $_POST['vaxx_orc_nonce'] ) || ! wp_verify_nonce( $_POST['vaxx_orc_nonce'], 'vaxx_orcamento' ) ) {
+		error_log( '[VAXX][Orçamento] nonce inválido — abort.' );
 		wp_safe_redirect( add_query_arg( 'orc_err', 'nonce', vaxx_orcamento_url() ) );
 		exit;
 	}
-	if ( ! class_exists( 'WooCommerce' ) || ! WC()->cart || WC()->cart->is_empty() ) {
-		wp_safe_redirect( wc_get_cart_url() );
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		error_log( '[VAXX][Orçamento] WooCommerce não está ativo — abort.' );
+		wp_safe_redirect( add_query_arg( 'orc_err', 'wc', vaxx_orcamento_url() ) );
+		exit;
+	}
+
+	// admin-post.php não inicializa o WC cart automaticamente. Carrega session
+	// + cart explicitamente pra ler os items adicionados pelo cliente no front.
+	if ( ! WC()->cart ) {
+		if ( function_exists( 'wc_load_cart' ) ) {
+			wc_load_cart();
+		}
+	}
+	if ( WC()->cart && method_exists( WC()->cart, 'get_cart_from_session' ) ) {
+		// Garante que items da sessão estão populados
+		WC()->cart->get_cart_from_session();
+	}
+	if ( ! WC()->cart || WC()->cart->is_empty() ) {
+		error_log( '[VAXX][Orçamento] cart vazio em admin-post (session: ' . ( WC()->session ? 'ok' : 'null' ) . ') — abort.' );
+		wp_safe_redirect( add_query_arg( 'orc_err', 'cart', vaxx_orcamento_url() ) );
 		exit;
 	}
 

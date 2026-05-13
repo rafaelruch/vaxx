@@ -379,6 +379,13 @@ function vaxx_force_classic_cart_checkout( $content ) {
 	if ( ! function_exists( 'is_cart' ) || ! function_exists( 'is_checkout' ) ) return $content;
 	if ( ! in_the_loop() || ! is_main_query() ) return $content;
 
+	if ( is_cart() || is_checkout() ) {
+		// Desliga wpautop pra esse content — wpautop injeta <p> em quebras de
+		// linha do template cart.php / form-checkout.php e quebra alinhamento
+		// dos elementos block (flex grid items recebem <p> vazio fantasma).
+		remove_filter( 'the_content', 'wpautop' );
+	}
+
 	if ( is_cart() )     return do_shortcode( '[woocommerce_cart]' );
 	if ( is_checkout() ) return do_shortcode( '[woocommerce_checkout]' );
 	return $content;
