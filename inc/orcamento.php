@@ -144,6 +144,17 @@ add_action( 'template_redirect', function() {
 }, 5 );
 
 /**
+ * Desliga wpautop na página /orcamento/ — wpautop injeta <p> dentro do
+ * <form>, podendo deslocar inputs pra fora dele e fazer o submit não
+ * enviar campos.
+ */
+add_action( 'template_redirect', function() {
+	if ( is_page( defined( 'VAXX_ORCAMENTO_SLUG' ) ? VAXX_ORCAMENTO_SLUG : 'orcamento' ) ) {
+		remove_filter( 'the_content', 'wpautop' );
+	}
+}, 9 );
+
+/**
  * Shortcode [vaxx_orcamento] — form + resumo do carrinho.
  * Se houver ?orcamento=<id> na URL, renderiza tela de confirmação.
  */
@@ -464,7 +475,25 @@ function vaxx_orcamento_err_msg( $key ) {
 		'cart'    => 'Seu carrinho está vazio. Inclua produtos antes de solicitar o orçamento.',
 		'wc'      => 'Integração de e-commerce indisponível. Tente novamente em instantes.',
 	);
-	return $map[ $key ] ?? 'Erro no envio. Tente novamente.';
+	$base = $map[ $key ] ?? 'Erro no envio. Tente novamente.';
+	if ( $key === 'missing' && ! empty( $_GET['orc_missing'] ) ) {
+		$campos = array_filter( array_map( 'sanitize_key', explode( ',', wp_unslash( $_GET['orc_missing'] ) ) ) );
+		$labels = array(
+			'nome'         => 'Nome',
+			'razao_social' => 'Razão Social',
+			'cnpj'         => 'CNPJ',
+			'tel'          => 'Telefone',
+			'cep'          => 'CEP',
+			'rua'          => 'Rua',
+			'numero'       => 'Número',
+			'bairro'       => 'Bairro',
+			'cidade'       => 'Cidade',
+			'uf'           => 'UF',
+		);
+		$nice = array_map( function( $k ) use ( $labels ) { return $labels[ $k ] ?? $k; }, $campos );
+		if ( $nice ) $base .= ' Faltou: ' . implode( ', ', $nice ) . '.';
+	}
+	return $base;
 }
 
 /**
@@ -526,11 +555,33 @@ function vaxx_handle_orcamento_submit() {
 	$uf     = strtoupper( substr( sanitize_text_field( wp_unslash( $_POST['uf'] ?? '' ) ), 0, 2 ) );
 
 	if ( ! $email || ! is_email( $email ) ) {
+		error_log( '[VAXX][Orçamento] email inválido: ' . $email );
 		wp_safe_redirect( add_query_arg( 'orc_err', 'email', vaxx_orcamento_url() ) );
 		exit;
 	}
-	if ( ! $nome || ! $tel || ! $cep || ! $rua || ! $num || ! $bairro || ! $cidade || ! $uf ) {
-		wp_safe_redirect( add_query_arg( 'orc_err', 'missing', vaxx_orcamento_url() ) );
+
+	$required_check = array(
+		'nome'   => $nome,
+		'tel'    => $tel,
+		'cep'    => $cep,
+		'rua'    => $rua,
+		'numero' => $num,
+		'bairro' => $bairro,
+		'cidade' => $cidade,
+		'uf'     => $uf,
+	);
+	if ( $is_pj ) {
+		$required_check['razao_social'] = $razao;
+		$required_check['cnpj']         = $cnpj;
+	}
+	$missing = array_keys( array_filter( $required_check, function( $v ) { return $v === '' || $v === null; } ) );
+	if ( ! empty( $missing ) ) {
+		error_log( '[VAXX][Orçamento] campos faltando (tipo_pessoa=' . $tipo . '): ' . implode( ',', $missing ) . ' | POST keys: ' . implode( ',', array_keys( $_POST ) ) );
+		$url = add_query_arg( array(
+			'orc_err'     => 'missing',
+			'orc_missing' => implode( ',', $missing ),
+		), vaxx_orcamento_url() );
+		wp_safe_redirect( $url );
 		exit;
 	}
 
