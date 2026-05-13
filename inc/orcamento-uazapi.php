@@ -36,7 +36,7 @@ add_action( 'customize_register', function( $wp_customize ) {
 		'uazapi_status'   => array( 'label' => 'Status da integração', 'type' => 'select', 'default' => 'off', 'choices' => array( 'off' => 'Desligado', 'on' => 'Ligado' ) ),
 		'uazapi_url'      => array( 'label' => 'URL base da instância (ex.: https://minhainstancia.uazapi.com)', 'type' => 'url', 'default' => '' ),
 		'uazapi_token'    => array( 'label' => 'Token de autenticação', 'type' => 'text', 'default' => '' ),
-		'uazapi_destino'  => array( 'label' => 'Número do responsável (E.164, ex.: 5547999999999) — vazio usa o WhatsApp da marca', 'type' => 'text', 'default' => '' ),
+		'uazapi_destino'  => array( 'label' => 'Número do responsável (E.164, ex.: 5547999999999) — vazio usa o WhatsApp da marca', 'type' => 'text', 'default' => '5547999402864' ),
 	);
 
 	foreach ( $fields as $slug => $opts ) {
