@@ -96,11 +96,11 @@ $item_count = WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
 		<span class="checkout-summary__total-label">Total</span>
 		<span class="checkout-summary__total-value"><?php wc_cart_totals_order_total_html(); ?></span>
 	</div>
-	<p class="checkout-summary__note">Pagamento em Pix · Cartão até 10× · ou Boleto bancário</p>
+	<p class="checkout-summary__note">Proposta com prazo e condição enviada em até 1 dia útil</p>
 </div>
 
-<button type="submit" class="checkout-summary__cta" name="woocommerce_checkout_place_order" id="place_order" value="Finalizar compra" data-value="Finalizar compra">
-	<span>Finalizar compra</span>
+<button type="submit" class="checkout-summary__cta" name="woocommerce_checkout_place_order" id="place_order" value="Solicitar orçamento" data-value="Solicitar orçamento">
+	<span>Solicitar orçamento</span>
 	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 </button>
 

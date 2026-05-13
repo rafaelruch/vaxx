@@ -212,7 +212,7 @@ function vaxx_shortcode_header() {
 
 				<?php if ( class_exists( 'WooCommerce' ) ) : ?>
 				<?php $count = is_object( WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0; ?>
-				<button type="button" class="header__icon-btn" id="cartOpenBtn" aria-label="Abrir carrinho" aria-expanded="false" aria-controls="cartDrawer">
+				<button type="button" class="header__icon-btn" id="cartOpenBtn" aria-label="Abrir orçamento" aria-expanded="false" aria-controls="cartDrawer">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="9" cy="21" r="1"/>
 						<circle cx="20" cy="21" r="1"/>
@@ -416,10 +416,10 @@ function vaxx_shortcode_mini_cart() {
 
 		<header class="cart-header">
 			<div class="cart-header__title">
-				<h3 id="cartTitle">Carrinho</h3>
+				<h3 id="cartTitle">Orçamento</h3>
 				<span class="cart-header__count" id="cartHeaderCount"><?php echo (int) $count; ?></span>
 			</div>
-			<button type="button" class="cart-close" id="cartCloseBtn" aria-label="Fechar carrinho">
+			<button type="button" class="cart-close" id="cartCloseBtn" aria-label="Fechar orçamento">
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 			</button>
 		</header>
@@ -433,8 +433,8 @@ function vaxx_shortcode_mini_cart() {
 						<path d="M16 10a4 4 0 0 1-8 0"/>
 					</svg>
 				</div>
-				<h4 class="cart-body__empty-title">Seu carrinho está vazio</h4>
-				<p class="cart-body__empty-desc">Encontre equipamentos forjados em ferro para academia profissional ou doméstica.</p>
+				<h4 class="cart-body__empty-title">Seu orçamento está vazio</h4>
+				<p class="cart-body__empty-desc">Inclua equipamentos forjados em ferro para montar a proposta da sua academia.</p>
 				<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="cart-body__empty-cta">
 					Ver catálogo
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -492,7 +492,7 @@ function vaxx_shortcode_mini_cart() {
 				Fazer orçamento
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 			</a>
-			<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="cart-view-full">Ver carrinho completo</a>
+			<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="cart-view-full">Ver orçamento completo</a>
 		</footer>
 
 	</aside>

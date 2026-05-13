@@ -63,6 +63,42 @@ add_filter( 'woocommerce_my_account_my_orders_query', function( $args ) {
 } );
 
 /**
+ * Desabilita TODO o sistema de frete. Loja é cotação, não venda direta —
+ * frete entra na proposta comercial fora do site.
+ *
+ * Efeitos:
+ *   - Cart classic não exibe linha "Entrega" nem o calculador de CEP
+ *   - Checkout (caso seja acessado direto) não exige endereço de entrega
+ *   - Orders criadas via /orcamento/ não têm shipping line items
+ *   - Página de produto não mostra estimativa de frete
+ */
+add_filter( 'woocommerce_cart_needs_shipping',             '__return_false' );
+add_filter( 'woocommerce_cart_needs_shipping_address',     '__return_false' );
+add_filter( 'woocommerce_ship_to_different_address_checked','__return_false' );
+add_filter( 'woocommerce_cart_ready_to_calc_shipping',     '__return_false' );
+add_filter( 'woocommerce_shipping_show_shipping_calculator','__return_false' );
+add_filter( 'wc_shipping_enabled',                          '__return_false' );
+add_filter( 'woocommerce_order_needs_shipping_address',    '__return_false' );
+
+/**
+ * Renomeia o copy do WooCommerce em todo o site:
+ *   - "Adicionar ao carrinho" → "Incluir no orçamento"
+ *   - "Visualizar carrinho" / mensagens de fragments → variantes em orçamento
+ */
+add_filter( 'woocommerce_product_single_add_to_cart_text', function() { return 'Incluir no orçamento'; }, 20 );
+add_filter( 'woocommerce_product_add_to_cart_text',         function() { return 'Incluir no orçamento'; }, 20 );
+
+add_filter( 'wc_add_to_cart_message_html', function( $message, $products = array(), $show_qty = false ) {
+	$shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'cart' ) : home_url( '/carrinho/' );
+	return sprintf(
+		'<a href="%s" tabindex="1" class="button wc-forward">%s</a> %s',
+		esc_url( $shop ),
+		esc_html__( 'Ver orçamento', 'vaxx' ),
+		esc_html__( 'Produto incluído no orçamento.', 'vaxx' )
+	);
+}, 10, 3 );
+
+/**
  * Cria a página /orcamento/ se ainda não existe. Guard por transient pra
  * evitar lookup em todo request. Roda também em after_switch_theme.
  */

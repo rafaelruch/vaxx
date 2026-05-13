@@ -508,7 +508,7 @@
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
         '</span>' +
         '<span class="vaxx-notice__msg">' + msg + '</span>' +
-        '<a class="vaxx-notice__cta" href="/cart/">Ver carrinho ' +
+        '<a class="vaxx-notice__cta" href="/carrinho/">Ver orçamento ' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
         '</a>' +
         '<button type="button" class="vaxx-notice__close" aria-label="Fechar">' +
@@ -650,10 +650,10 @@
       });
 
       if (res.ok || res.redirected) {
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Adicionado';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Incluído';
         btn.classList.remove('is-loading');
         btn.classList.add('is-success');
-        showToast('Produto adicionado ao carrinho');
+        showToast('Produto incluído no orçamento');
         bumpCartIcon();
         // Re-renderiza drawer inteiro (items atualizados) + abre pra mostrar o item
         if (window.vaxxRefreshCart) {
