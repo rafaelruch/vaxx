@@ -82,17 +82,25 @@
 	margin: 0;
 }
 
-/* ─── Layout: lista wide + sidebar fixed à direita em ≥1024px ─── */
+/* ─── Layout: lista col 1 + summary col 2 (sticky alinhado pelo topo) ─── */
 .vx-cart__layout {
 	display: flex;
 	flex-direction: column;
 	gap: 32px;
 }
 @media (min-width: 1024px) {
-	.vx-cart__layout { gap: 40px; padding-right: 380px; }
+	.vx-cart__layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 340px;
+		gap: 32px 48px;
+		align-items: start;
+	}
+	.vx-cart__items-form  { grid-column: 1; grid-row: 1; }
+	.vx-cart__actions-row { grid-column: 1; grid-row: 2; }
+	.vx-cart__summary     { grid-column: 2; grid-row: 1 / span 2; }
 }
 @media (min-width: 1440px) {
-	.vx-cart__layout { padding-right: 420px; }
+	.vx-cart__layout { grid-template-columns: minmax(0, 1fr) 380px; gap: 32px 64px; }
 }
 
 /* ─── Lista de items ─────────────────────────────────── */
@@ -318,21 +326,13 @@
 .vx-cart__update:hover { border-color: var(--vaxx-lima); color: var(--vaxx-lima); }
 .vx-cart__update svg { width: 14px; height: 14px; }
 
-/* ─── Summary: full-width no fluxo (mobile/tablet) ou fixed à direita (≥1024px) ─── */
+/* ─── Summary: no fluxo (mobile/tablet) · sticky alinhado pelo topo da lista (≥1024px) ─── */
 .vx-cart__summary { min-width: 0; }
 @media (min-width: 1024px) {
-	.vx-cart__summary {
-		position: fixed;
-		top: 132px;             /* abaixo do header fixo 116px + breadcrumb */
-		right: 48px;            /* alinha com padding canônico do container */
-		width: 340px;
-		max-height: calc(100dvh - 156px);
-		overflow-y: auto;
-		z-index: 5;
+	.vx-cart__summary-inner {
+		position: sticky;
+		top: 132px;
 	}
-}
-@media (min-width: 1440px) {
-	.vx-cart__summary { right: 72px; width: 380px; }
 }
 .vx-cart__summary-inner {
 	background: var(--vaxx-carvao);
