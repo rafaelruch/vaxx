@@ -119,6 +119,17 @@ body.vx-has-injected-bc .entry-content { padding-top: 64px; }
 	body.vx-has-injected-bc .entry-content { padding-top: 80px; }
 }
 
+/* Páginas Woo (cart/checkout/myaccount + page-ids correspondentes) já recebem
+   padding-top no <body> pelas regras Woo (72/116) — zera o do entry-content
+   pra não somar. O breadcrumb canônico continua aparecendo, mas posicionado
+   imediatamente depois do header fixo, como em /para-academias/ e /orcamento/. */
+body.woocommerce-cart.vx-has-injected-bc .entry-content,
+body.woocommerce-checkout.vx-has-injected-bc .entry-content,
+body.woocommerce-account.vx-has-injected-bc .entry-content,
+body.page-id-8.vx-has-injected-bc .entry-content,
+body.page-id-9.vx-has-injected-bc .entry-content,
+body.page-id-10.vx-has-injected-bc .entry-content { padding-top: 0 !important; }
+
 /* Defesa contra overflow horizontal do WooCommerce block grid (cart vazio "Você pode gostar...") */
 .wc-block-grid,
 .wc-block-grid__products {

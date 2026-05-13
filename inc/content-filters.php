@@ -43,6 +43,7 @@ function vaxx_pages_with_injected_breadcrumb() {
 		'termos-de-uso'           => 'Termos de uso',
 		'politica-de-privacidade' => 'Política de privacidade',
 		'orcamento'               => 'Solicitar orçamento',
+		'carrinho'                => 'Orçamento',
 	);
 }
 

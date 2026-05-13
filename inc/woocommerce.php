@@ -383,7 +383,10 @@ function vaxx_force_classic_cart_checkout( $content ) {
 	if ( is_checkout() ) return do_shortcode( '[woocommerce_checkout]' );
 	return $content;
 }
-add_filter( 'the_content', 'vaxx_force_classic_cart_checkout', 100 );
+// priority 5 — força classic ANTES dos filtros que prepend breadcrumb (10) e
+// substituem ★ por SVG (10), pra esses filtros operarem em cima do output
+// do shortcode em vez de serem sobrescritos.
+add_filter( 'the_content', 'vaxx_force_classic_cart_checkout', 5 );
 
 /**
  * Cria atributo global "pa_regulagem-real" (sim/não) no Woo.

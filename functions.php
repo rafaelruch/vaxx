@@ -79,6 +79,9 @@ function vaxx_theme_assets() {
 		if ( is_product() ) {
 			wp_enqueue_style( 'vaxx-woo-single', VAXX_THEME_URI . '/assets/css/woo-single.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-single.css' ) );
 		}
+		if ( is_cart() && file_exists( VAXX_THEME_DIR . '/assets/css/woo-cart.css' ) ) {
+			wp_enqueue_style( 'vaxx-woo-cart', VAXX_THEME_URI . '/assets/css/woo-cart.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-cart.css' ) );
+		}
 		if ( is_checkout() ) {
 			wp_enqueue_style( 'vaxx-woo-checkout', VAXX_THEME_URI . '/assets/css/woo-checkout.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-checkout.css' ) );
 		}
