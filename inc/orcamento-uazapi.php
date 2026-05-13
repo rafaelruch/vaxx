@@ -56,7 +56,10 @@ add_action( 'customize_register', function( $wp_customize ) {
  */
 function vaxx_uazapi_send_text( $number, $text ) {
 	$status = get_theme_mod( 'vaxx_uazapi_status', 'off' );
-	if ( $status !== 'on' ) return false;
+	if ( $status !== 'on' ) {
+		error_log( '[VAXX][Uazapi] Status=desligado — skip envio.' );
+		return false;
+	}
 
 	$base  = trim( (string) get_theme_mod( 'vaxx_uazapi_url', '' ), '/' );
 	$token = trim( (string) get_theme_mod( 'vaxx_uazapi_token', '' ) );
@@ -85,22 +88,32 @@ function vaxx_uazapi_send_text( $number, $text ) {
 		'text'   => $text,
 	), $number_clean, $text );
 
+	$started = microtime( true );
+	error_log( sprintf( '[VAXX][Uazapi] →POST %s · destino=%s · %d chars', $endpoint, $number_clean, strlen( $text ) ) );
+
 	$resp = wp_remote_post( $endpoint, array(
 		'headers' => $headers,
 		'body'    => wp_json_encode( $body ),
 		'timeout' => 15,
 	) );
 
+	$elapsed_ms = (int) ( ( microtime( true ) - $started ) * 1000 );
+
 	if ( is_wp_error( $resp ) ) {
-		error_log( '[VAXX][Uazapi] Falha HTTP: ' . $resp->get_error_message() );
+		error_log( sprintf( '[VAXX][Uazapi] ✗ Falha HTTP em %dms: %s', $elapsed_ms, $resp->get_error_message() ) );
 		return false;
 	}
 
 	$code = (int) wp_remote_retrieve_response_code( $resp );
+	$resp_body = wp_remote_retrieve_body( $resp );
 	if ( $code < 200 || $code >= 300 ) {
-		error_log( '[VAXX][Uazapi] Resposta ' . $code . ': ' . wp_remote_retrieve_body( $resp ) );
+		error_log( sprintf( '[VAXX][Uazapi] ✗ Resposta %d em %dms · body: %s', $code, $elapsed_ms, $resp_body ) );
 		return false;
 	}
+
+	// Sucesso — loga short preview da resposta (Uazapi normalmente devolve JSON com id/status)
+	$preview = is_string( $resp_body ) ? substr( $resp_body, 0, 200 ) : '';
+	error_log( sprintf( '[VAXX][Uazapi] ✓ OK %d em %dms · destino=%s · body: %s', $code, $elapsed_ms, $number_clean, $preview ) );
 	return true;
 }
 
