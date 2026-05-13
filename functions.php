@@ -108,6 +108,12 @@ function vaxx_theme_assets() {
 			wp_enqueue_script( 'vaxx-woo-myaccount', VAXX_THEME_URI . '/assets/js/woo-myaccount.js', array(), $ver, true );
 		}
 	}
+
+	// Página de orçamento (slug 'orcamento') — pode ou não ter WC ativo
+	if ( is_page( defined( 'VAXX_ORCAMENTO_SLUG' ) ? VAXX_ORCAMENTO_SLUG : 'orcamento' ) ) {
+		wp_enqueue_style( 'vaxx-orcamento', VAXX_THEME_URI . '/assets/css/orcamento.css', array( 'vaxx-global' ), $ver );
+		wp_enqueue_script( 'vaxx-orcamento', VAXX_THEME_URI . '/assets/js/orcamento.js', array(), $ver, true );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'vaxx_theme_assets' );
 
@@ -132,6 +138,7 @@ $vaxx_includes = array(
 	'inc/woocommerce.php',       // Overrides + hooks
 	'inc/block-patterns.php',    // Registro de patterns
 	'inc/content-filters.php',   // Sanitiza ★ + injeta breadcrumb canônico + dequeue MP off-checkout
+	'inc/orcamento.php',         // Fluxo de orçamento (substitui checkout de pagamento)
 );
 foreach ( $vaxx_includes as $file ) {
 	$path = VAXX_THEME_DIR . '/' . $file;

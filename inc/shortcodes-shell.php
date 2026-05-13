@@ -488,8 +488,8 @@ function vaxx_shortcode_mini_cart() {
 				<span class="cart-subtotal__label">Subtotal</span>
 				<span class="cart-subtotal__value" id="cartSubtotal">R$ <?php echo esc_html( number_format( (int) $subtotal_raw, 0, ',', '.' ) ); ?></span>
 			</div>
-			<a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-checkout-btn">
-				Finalizar compra
+			<a href="<?php echo esc_url( function_exists( 'vaxx_orcamento_url' ) ? vaxx_orcamento_url() : home_url( '/orcamento/' ) ); ?>" class="cart-checkout-btn">
+				Fazer orçamento
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 			</a>
 			<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="cart-view-full">Ver carrinho completo</a>

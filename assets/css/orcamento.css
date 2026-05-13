@@ -1,0 +1,418 @@
+/* ═══════════════════════════════════════════════════════════════════
+   VAXX · Página de Orçamento (/orcamento/)
+   Form de dados + resumo do carrinho + tela de confirmação.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.page-id-orcamento .entry-content { padding-top: 0; }
+
+.vx-orc {
+	background: var(--vaxx-preto, #0A0A0A);
+	color: var(--vaxx-branco, #fff);
+	padding: 32px 0 80px;
+	min-height: 60dvh;
+}
+.vx-orc__inner {
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+@media (min-width: 768px)  { .vx-orc__inner { padding: 0 32px; } }
+@media (min-width: 1024px) { .vx-orc__inner { padding: 0 48px; } }
+@media (min-width: 1440px) { .vx-orc__inner { padding: 0 72px; } }
+
+/* ─── Hero ──────────────────────────────────────────── */
+.vx-orc__hero { max-width: 720px; margin: 16px 0 32px; }
+.vx-orc__eyebrow {
+	display: inline-block;
+	font-family: var(--font-display);
+	font-size: 11px;
+	font-weight: 900;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--vaxx-lima);
+	margin-bottom: 12px;
+}
+.vx-orc__title {
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: clamp(32px, 5vw, 56px);
+	line-height: 1;
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+	margin: 0 0 12px;
+}
+.vx-orc__lead {
+	color: rgba(255,255,255,0.65);
+	font-size: 15px;
+	line-height: 1.55;
+	max-width: 56ch;
+	margin: 0;
+}
+
+/* ─── Notice (erro) ─────────────────────────────────── */
+.vx-orc__notice {
+	padding: 14px 16px;
+	border-radius: 8px;
+	font-size: 14px;
+	margin-bottom: 24px;
+}
+.vx-orc__notice--error {
+	background: rgba(255, 85, 85, 0.08);
+	border: 1px solid rgba(255, 85, 85, 0.32);
+	color: #ff8b8b;
+}
+
+/* ─── Layout 2 colunas ──────────────────────────────── */
+.vx-orc__layout {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 32px;
+	align-items: start;
+}
+@media (min-width: 1024px) {
+	.vx-orc__layout { grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); gap: 48px; }
+}
+
+/* ─── Form ──────────────────────────────────────────── */
+.vx-orc__form { min-width: 0; }
+.vx-orc__fieldset {
+	border: 1px solid rgba(255,255,255,0.08);
+	background: var(--vaxx-carvao, #111);
+	padding: 24px;
+	margin: 0 0 16px;
+	border-radius: 12px;
+}
+.vx-orc__legend {
+	font-family: var(--font-display);
+	font-size: 13px;
+	font-weight: 900;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--vaxx-lima);
+	padding: 0;
+	margin: 0 0 16px;
+}
+
+.vx-orc__grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+}
+@media (max-width: 599px) { .vx-orc__grid { grid-template-columns: 1fr; } }
+
+.vx-orc__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.vx-orc__field--full { grid-column: 1 / -1; }
+.vx-orc__field--uf { max-width: 100px; }
+@media (max-width: 599px) {
+	.vx-orc__field--full { grid-column: auto; }
+	.vx-orc__field--uf { max-width: 100%; }
+}
+
+.vx-orc__field label {
+	font-size: 12px;
+	font-weight: 600;
+	color: rgba(255,255,255,0.78);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+.vx-orc__field input,
+.vx-orc__field select {
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255,255,255,0.12);
+	color: var(--vaxx-branco);
+	padding: 12px 14px;
+	border-radius: 8px;
+	font-family: var(--font-body);
+	font-size: 15px;
+	min-height: 48px;
+	transition: border-color 180ms var(--ease), background 180ms var(--ease);
+}
+.vx-orc__field input:focus,
+.vx-orc__field select:focus {
+	outline: none;
+	border-color: var(--vaxx-lima);
+	background: rgba(255,255,255,0.06);
+	box-shadow: 0 0 0 3px rgba(200, 255, 0, 0.16);
+}
+.vx-orc__field input::placeholder { color: rgba(255,255,255,0.32); }
+.vx-orc__hint {
+	font-size: 12px;
+	color: rgba(255,255,255,0.5);
+	min-height: 16px;
+}
+.vx-orc__hint--loading { color: var(--vaxx-lima); }
+.vx-orc__hint--error { color: #ff8b8b; }
+
+/* ─── Radio cards PF/PJ ─────────────────────────────── */
+.vx-orc__radio-group {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 10px;
+}
+@media (min-width: 600px) {
+	.vx-orc__radio-group { grid-template-columns: 1fr 1fr; gap: 12px; }
+}
+.vx-orc__radio {
+	display: flex;
+	cursor: pointer;
+}
+.vx-orc__radio input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+.vx-orc__radio-box {
+	flex: 1;
+	padding: 16px;
+	border: 1px solid rgba(255,255,255,0.12);
+	border-radius: 10px;
+	background: rgba(255,255,255,0.02);
+	transition: border-color 180ms var(--ease), background 180ms var(--ease);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.vx-orc__radio input:checked + .vx-orc__radio-box {
+	border-color: var(--vaxx-lima);
+	background: rgba(200, 255, 0, 0.08);
+}
+.vx-orc__radio input:focus-visible + .vx-orc__radio-box {
+	box-shadow: 0 0 0 3px rgba(200, 255, 0, 0.24);
+}
+.vx-orc__radio-title {
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: 14px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+.vx-orc__radio-desc {
+	font-size: 12px;
+	color: rgba(255,255,255,0.55);
+}
+
+/* ─── Submit row ────────────────────────────────────── */
+.vx-orc__submit-row {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: 8px;
+}
+.vx-orc__submit {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	background: var(--vaxx-lima);
+	color: var(--vaxx-preto);
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: 15px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	padding: 18px 28px;
+	border: none;
+	border-radius: 999px;
+	cursor: pointer;
+	min-height: 56px;
+	transition: transform 180ms var(--ease), box-shadow 180ms var(--ease), filter 180ms var(--ease);
+}
+.vx-orc__submit:hover { transform: translateY(-1px); box-shadow: 0 12px 32px rgba(200,255,0,0.24); }
+.vx-orc__submit:active { transform: translateY(0); }
+.vx-orc__submit[disabled] { filter: grayscale(0.5); opacity: 0.6; cursor: wait; }
+.vx-orc__submit-arrow { width: 18px; height: 18px; }
+.vx-orc__legal { font-size: 12px; color: rgba(255,255,255,0.5); margin: 0; line-height: 1.5; }
+.vx-orc__legal a { color: rgba(255,255,255,0.78); text-decoration: underline; }
+.vx-orc__legal a:hover { color: var(--vaxx-lima); }
+
+/* ─── Summary (resumo do carrinho) ──────────────────── */
+.vx-orc__summary { min-width: 0; }
+.vx-orc__summary-inner {
+	background: var(--vaxx-carvao, #111);
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 12px;
+	padding: 24px;
+	position: sticky;
+	top: 116px;
+}
+@media (max-width: 1023px) { .vx-orc__summary-inner { position: static; } }
+.vx-orc__summary-title {
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: 18px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	margin: 0 0 18px;
+}
+.vx-orc__items { list-style: none; padding: 0; margin: 0 0 18px; display: flex; flex-direction: column; gap: 14px; }
+.vx-orc__item {
+	display: grid;
+	grid-template-columns: 56px 1fr auto;
+	gap: 12px;
+	align-items: center;
+	padding-bottom: 14px;
+	border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.vx-orc__item:last-child { border-bottom: none; padding-bottom: 0; }
+.vx-orc__item-media {
+	width: 56px; height: 56px;
+	border-radius: 8px;
+	overflow: hidden;
+	background: rgba(255,255,255,0.04);
+}
+.vx-orc__item-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vx-orc__item-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vx-orc__item-name { font-size: 13px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; }
+.vx-orc__item-qty { font-size: 12px; color: rgba(255,255,255,0.5); }
+.vx-orc__item-price { font-size: 13px; font-weight: 700; }
+
+.vx-orc__total {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 0;
+	border-top: 1px solid rgba(255,255,255,0.08);
+	border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.vx-orc__total-label { font-size: 13px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.vx-orc__total-value { font-family: var(--font-display); font-weight: 900; font-size: 22px; }
+.vx-orc__note { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5; margin: 14px 0 0; }
+
+/* ─── Empty state ───────────────────────────────────── */
+.vx-orc--empty .vx-orc__inner { padding-top: 80px; padding-bottom: 80px; }
+.vx-orc-empty {
+	text-align: center;
+	max-width: 480px;
+	margin: 0 auto;
+	padding: 56px 24px;
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 12px;
+	background: var(--vaxx-carvao, #111);
+}
+.vx-orc-empty__icon {
+	width: 64px; height: 64px;
+	margin: 0 auto 20px;
+	border-radius: 50%;
+	background: rgba(200, 255, 0, 0.08);
+	color: var(--vaxx-lima);
+	display: flex; align-items: center; justify-content: center;
+}
+.vx-orc-empty__icon svg { width: 28px; height: 28px; }
+.vx-orc-empty h2 {
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: 22px;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	margin: 0 0 8px;
+}
+.vx-orc-empty p { color: rgba(255,255,255,0.55); font-size: 14px; margin: 0 0 24px; line-height: 1.5; }
+.vx-orc-empty__cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--vaxx-lima);
+	color: var(--vaxx-preto);
+	padding: 14px 28px;
+	border-radius: 999px;
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: 13px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	text-decoration: none;
+	min-height: 48px;
+}
+
+/* ─── Thank you ─────────────────────────────────────── */
+.vx-orc--thanks .vx-orc__inner { padding-top: 80px; padding-bottom: 80px; }
+.vx-orc-thanks {
+	max-width: 640px;
+	margin: 0 auto;
+	text-align: center;
+}
+.vx-orc-thanks__icon {
+	width: 80px; height: 80px;
+	margin: 0 auto 24px;
+	border-radius: 50%;
+	background: rgba(200, 255, 0, 0.12);
+	border: 2px solid var(--vaxx-lima);
+	color: var(--vaxx-lima);
+	display: flex; align-items: center; justify-content: center;
+}
+.vx-orc-thanks__icon svg { width: 38px; height: 38px; }
+.vx-orc-thanks__title {
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: clamp(28px, 4vw, 44px);
+	text-transform: uppercase;
+	letter-spacing: -0.01em;
+	margin: 0 0 12px;
+}
+.vx-orc-thanks__lead {
+	color: rgba(255,255,255,0.78);
+	font-size: 16px;
+	line-height: 1.55;
+	margin: 0 0 32px;
+}
+.vx-orc-thanks__panel {
+	background: var(--vaxx-carvao, #111);
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 12px;
+	padding: 20px;
+	margin: 0 0 28px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	text-align: left;
+}
+.vx-orc-thanks__row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; }
+.vx-orc-thanks__row span { color: rgba(255,255,255,0.55); }
+.vx-orc-thanks__row strong { color: var(--vaxx-branco); }
+.vx-orc-thanks__cta-row {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 24px;
+}
+@media (min-width: 600px) { .vx-orc-thanks__cta-row { flex-direction: row; justify-content: center; } }
+.vx-orc-thanks__cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 14px 24px;
+	border-radius: 999px;
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: 13px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	text-decoration: none;
+	min-height: 48px;
+	transition: transform 180ms var(--ease);
+}
+.vx-orc-thanks__cta:hover { transform: translateY(-1px); }
+.vx-orc-thanks__cta--primary { background: var(--vaxx-lima); color: var(--vaxx-preto); }
+.vx-orc-thanks__cta--wa { background: #25D366; color: #fff; }
+.vx-orc-thanks__hint { font-size: 13px; color: rgba(255,255,255,0.5); margin: 0; }
+
+/* CTA do carrinho (override do button.alt do Woo) */
+.vx-orc-cart-cta,
+.vx-orc-cart-cta:visited {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	background: var(--vaxx-lima) !important;
+	color: var(--vaxx-preto) !important;
+	border-radius: 999px !important;
+	font-family: var(--font-display) !important;
+	font-weight: 900 !important;
+	letter-spacing: 0.1em !important;
+	text-transform: uppercase !important;
+	padding: 16px 28px !important;
+	min-height: 52px;
+	text-decoration: none !important;
+}
+.vx-orc-cart-cta svg { width: 18px; height: 18px; }
+.vx-orc-cart-cta:hover { filter: brightness(1.05); }
