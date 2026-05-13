@@ -41,78 +41,57 @@ function vaxx_theme_setup() {
 add_action( 'after_setup_theme', 'vaxx_theme_setup' );
 
 /**
+ * Helper de versionamento: usa filemtime() do asset como query string,
+ * garantindo cache-bust automático em qualquer mudança do arquivo. Cai
+ * pro VAXX_THEME_VERSION se o arquivo não existir. Em WP_DEBUG retorna
+ * time() pra atualizar a cada page load.
+ */
+function vaxx_asset_ver( $relpath ) {
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) return time();
+	$abs = VAXX_THEME_DIR . '/' . ltrim( $relpath, '/' );
+	$mtime = file_exists( $abs ) ? filemtime( $abs ) : false;
+	return $mtime ? (string) $mtime : VAXX_THEME_VERSION;
+}
+
+/**
  * Enqueue styles + scripts.
  */
 function vaxx_theme_assets() {
-	$ver = defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : VAXX_THEME_VERSION;
-
 	// Fonts self-hosted — primeiro, pra @font-face rules estarem disponiveis
 	// antes de qualquer CSS que referencie as families.
-	wp_enqueue_style(
-		'vaxx-fonts',
-		VAXX_THEME_URI . '/assets/css/fonts.css',
-		array(),
-		$ver
-	);
-
-	// Global design tokens + componentes
-	wp_enqueue_style(
-		'vaxx-global',
-		VAXX_THEME_URI . '/assets/css/global.css',
-		array( 'vaxx-fonts' ),
-		$ver
-	);
+	wp_enqueue_style( 'vaxx-fonts',  VAXX_THEME_URI . '/assets/css/fonts.css',  array(),               vaxx_asset_ver( 'assets/css/fonts.css' ) );
+	wp_enqueue_style( 'vaxx-global', VAXX_THEME_URI . '/assets/css/global.css', array( 'vaxx-fonts' ), vaxx_asset_ver( 'assets/css/global.css' ) );
 
 	// Pages CSS consolidado — extraido dos <style> inline das paginas populadas.
-	// Browser cacheia entre navegacoes. Evita re-parsear 80-130KB por pagina.
 	if ( file_exists( VAXX_THEME_DIR . '/assets/css/pages.css' ) ) {
-		wp_enqueue_style(
-			'vaxx-pages',
-			VAXX_THEME_URI . '/assets/css/pages.css',
-			array( 'vaxx-global' ),
-			$ver
-		);
+		wp_enqueue_style( 'vaxx-pages', VAXX_THEME_URI . '/assets/css/pages.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/pages.css' ) );
 	}
 
 	// Scripts globais (header scroll, mini-cart, etc.)
-	wp_enqueue_script(
-		'vaxx-global',
-		VAXX_THEME_URI . '/assets/js/global.js',
-		array(),
-		$ver,
-		true
-	);
-
-	// Header search overlay (abre/fecha/ESC/submit)
-	wp_enqueue_script(
-		'vaxx-header-search',
-		VAXX_THEME_URI . '/assets/js/header-search.js',
-		array(),
-		$ver,
-		true
-	);
+	wp_enqueue_script( 'vaxx-global',        VAXX_THEME_URI . '/assets/js/global.js',        array(), vaxx_asset_ver( 'assets/js/global.js' ),        true );
+	wp_enqueue_script( 'vaxx-header-search', VAXX_THEME_URI . '/assets/js/header-search.js', array(), vaxx_asset_ver( 'assets/js/header-search.js' ), true );
 
 	// WooCommerce · CSS condicional por contexto
 	if ( function_exists( 'is_woocommerce' ) ) {
 		if ( is_shop() || is_product_taxonomy() || is_product_category() || is_tax( 'product_line' ) || is_tax( 'muscle_group' ) ) {
-			wp_enqueue_style( 'vaxx-woo-archive', VAXX_THEME_URI . '/assets/css/woo-archive.css', array( 'vaxx-global' ), $ver );
+			wp_enqueue_style( 'vaxx-woo-archive', VAXX_THEME_URI . '/assets/css/woo-archive.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-archive.css' ) );
 		}
 		if ( is_product() ) {
-			wp_enqueue_style( 'vaxx-woo-single', VAXX_THEME_URI . '/assets/css/woo-single.css', array( 'vaxx-global' ), $ver );
+			wp_enqueue_style( 'vaxx-woo-single', VAXX_THEME_URI . '/assets/css/woo-single.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-single.css' ) );
 		}
 		if ( is_checkout() ) {
-			wp_enqueue_style( 'vaxx-woo-checkout', VAXX_THEME_URI . '/assets/css/woo-checkout.css', array( 'vaxx-global' ), $ver );
+			wp_enqueue_style( 'vaxx-woo-checkout', VAXX_THEME_URI . '/assets/css/woo-checkout.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-checkout.css' ) );
 		}
 		if ( function_exists( 'is_account_page' ) && is_account_page() ) {
-			wp_enqueue_style( 'vaxx-woo-myaccount', VAXX_THEME_URI . '/assets/css/woo-myaccount.css', array( 'vaxx-global' ), $ver );
-			wp_enqueue_script( 'vaxx-woo-myaccount', VAXX_THEME_URI . '/assets/js/woo-myaccount.js', array(), $ver, true );
+			wp_enqueue_style(  'vaxx-woo-myaccount', VAXX_THEME_URI . '/assets/css/woo-myaccount.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-myaccount.css' ) );
+			wp_enqueue_script( 'vaxx-woo-myaccount', VAXX_THEME_URI . '/assets/js/woo-myaccount.js',  array(),                vaxx_asset_ver( 'assets/js/woo-myaccount.js' ),  true );
 		}
 	}
 
-	// Página de orçamento (slug 'orcamento') — pode ou não ter WC ativo
+	// Página de orçamento
 	if ( is_page( defined( 'VAXX_ORCAMENTO_SLUG' ) ? VAXX_ORCAMENTO_SLUG : 'orcamento' ) ) {
-		wp_enqueue_style( 'vaxx-orcamento', VAXX_THEME_URI . '/assets/css/orcamento.css', array( 'vaxx-global' ), $ver );
-		wp_enqueue_script( 'vaxx-orcamento', VAXX_THEME_URI . '/assets/js/orcamento.js', array(), $ver, true );
+		wp_enqueue_style(  'vaxx-orcamento', VAXX_THEME_URI . '/assets/css/orcamento.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/orcamento.css' ) );
+		wp_enqueue_script( 'vaxx-orcamento', VAXX_THEME_URI . '/assets/js/orcamento.js',  array(),                vaxx_asset_ver( 'assets/js/orcamento.js' ),  true );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'vaxx_theme_assets' );
