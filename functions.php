@@ -139,6 +139,7 @@ $vaxx_includes = array(
 	'inc/block-patterns.php',    // Registro de patterns
 	'inc/content-filters.php',   // Sanitiza ★ + injeta breadcrumb canônico + dequeue MP off-checkout
 	'inc/orcamento.php',         // Fluxo de orçamento (substitui checkout de pagamento)
+	'inc/orcamento-uazapi.php',  // Disparo WhatsApp via Uazapi no submit do orçamento
 );
 foreach ( $vaxx_includes as $file ) {
 	$path = VAXX_THEME_DIR . '/' . $file;
