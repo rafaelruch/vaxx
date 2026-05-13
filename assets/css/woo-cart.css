@@ -82,13 +82,18 @@
 	margin: 0;
 }
 
-/* ─── Layout full-width vertical (lista em cima, summary embaixo) ─── */
+/* ─── Layout: lista wide + sidebar fixed à direita em ≥1024px ─── */
 .vx-cart__layout {
 	display: flex;
 	flex-direction: column;
 	gap: 32px;
 }
-@media (min-width: 1024px) { .vx-cart__layout { gap: 40px; } }
+@media (min-width: 1024px) {
+	.vx-cart__layout { gap: 40px; padding-right: 380px; }
+}
+@media (min-width: 1440px) {
+	.vx-cart__layout { padding-right: 420px; }
+}
 
 /* ─── Lista de items ─────────────────────────────────── */
 .vx-cart__items-form { min-width: 0; }
@@ -319,10 +324,21 @@
 .vx-cart__update:hover { border-color: var(--vaxx-lima); color: var(--vaxx-lima); }
 .vx-cart__update svg { width: 14px; height: 14px; }
 
-/* ─── Summary full-width (embaixo da lista) ─── */
-.vx-cart__summary { min-width: 0; align-self: stretch; }
+/* ─── Summary: full-width no fluxo (mobile/tablet) ou fixed à direita (≥1024px) ─── */
+.vx-cart__summary { min-width: 0; }
 @media (min-width: 1024px) {
-	.vx-cart__summary { align-self: flex-end; width: 100%; max-width: 480px; }
+	.vx-cart__summary {
+		position: fixed;
+		top: 132px;             /* abaixo do header fixo 116px + breadcrumb */
+		right: 48px;            /* alinha com padding canônico do container */
+		width: 340px;
+		max-height: calc(100dvh - 156px);
+		overflow-y: auto;
+		z-index: 5;
+	}
+}
+@media (min-width: 1440px) {
+	.vx-cart__summary { right: 72px; width: 380px; }
 }
 .vx-cart__summary-inner {
 	background: var(--vaxx-carvao);
