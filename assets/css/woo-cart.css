@@ -169,42 +169,38 @@
 .vx-cart__item-price-value { color: var(--vaxx-branco); font-weight: 600; }
 .vx-cart__item-price-value .amount { color: var(--vaxx-branco); }
 
+/* Quantidade + subtotal + remover sempre na MESMA linha, compactos */
 .vx-cart__item-actions {
 	grid-area: actions;
 	display: flex;
-	flex-wrap: wrap;
-	gap: 16px;
+	flex-direction: row;
 	align-items: center;
+	gap: 12px;
+	flex-wrap: nowrap;
 }
 @media (min-width: 768px) {
-	.vx-cart__item-actions {
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 12px;
-		justify-self: end;
-	}
+	.vx-cart__item-actions { gap: 16px; justify-self: end; }
 }
 
-/* Quantity input — sobrescreve o markup default do woocommerce_quantity_input */
+/* Quantity input compacto */
 .vx-cart__qty .quantity {
 	display: inline-flex;
 	align-items: center;
-	gap: 0;
 	background: var(--vaxx-preto);
 	border: 1px solid rgba(255,255,255,0.16);
 	border-radius: 999px;
-	padding: 4px;
-	height: 44px;
+	padding: 2px;
+	height: 36px;
 }
 .vx-cart__qty .qty {
 	background: transparent;
 	border: none;
 	color: var(--vaxx-branco);
-	font-family: var(--font-display);
-	font-weight: 900;
-	font-size: 16px;
-	width: 56px;
-	height: 36px;
+	font-family: var(--font-body);
+	font-weight: 700;
+	font-size: 14px;
+	width: 44px;
+	height: 30px;
 	text-align: center;
 	-moz-appearance: textfield;
 	outline: none;
@@ -215,21 +211,21 @@
 .vx-cart__qty .screen-reader-text { position: absolute; left: -9999px; }
 
 .vx-cart__item-subtotal {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 2px;
+	display: inline-flex;
+	align-items: baseline;
+	gap: 6px;
+	white-space: nowrap;
 }
 .vx-cart__item-subtotal-label {
 	font-size: 11px;
 	color: rgba(255,255,255,0.5);
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.06em;
 }
 .vx-cart__item-subtotal-value {
-	font-family: var(--font-display);
-	font-weight: 900;
-	font-size: 18px;
+	font-family: var(--font-body);
+	font-weight: 700;
+	font-size: 14px;
 	color: var(--vaxx-lima);
 }
 .vx-cart__item-subtotal-value .amount { color: var(--vaxx-lima); }
@@ -237,24 +233,22 @@
 .vx-cart__item-remove {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	justify-content: center;
 	background: transparent;
 	border: none;
 	color: rgba(255,255,255,0.5);
-	font-size: 12px;
-	font-family: var(--font-body);
 	text-decoration: none;
-	padding: 8px 4px;
-	min-height: 32px;
+	padding: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
 	cursor: pointer;
-	transition: color 180ms var(--ease);
+	transition: color 180ms var(--ease), background 180ms var(--ease);
+	flex-shrink: 0;
 }
-.vx-cart__item-remove:hover { color: var(--vaxx-lima); }
+.vx-cart__item-remove:hover { color: var(--vaxx-lima); background: rgba(200,255,0,0.08); }
 .vx-cart__item-remove svg { width: 16px; height: 16px; }
-@media (max-width: 767px) {
-	.vx-cart__item-remove span { display: none; }
-	.vx-cart__item-remove { margin-left: auto; }
-}
+.vx-cart__item-remove span { display: none; } /* só ícone — texto fica no aria-label */
 
 /* ─── Actions row (coupon + atualizar) ─────────────────────────────────── */
 .vx-cart__actions-row {
