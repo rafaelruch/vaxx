@@ -587,6 +587,7 @@ function vaxx_handle_orcamento_submit() {
 
 	// 1. Acha ou cria customer
 	$user_id = email_exists( $email );
+	$is_new_user = false;
 	if ( ! $user_id ) {
 		$username = sanitize_user( current( explode( '@', $email ) ), true );
 		// Garante uniqueness do login
@@ -604,11 +605,19 @@ function vaxx_handle_orcamento_submit() {
 			'role'       => 'customer',
 		) );
 		if ( is_wp_error( $user_id ) ) {
+			error_log( '[VAXX][Orçamento] Falha ao criar user: ' . $user_id->get_error_message() );
 			wp_safe_redirect( add_query_arg( 'orc_err', 'user', vaxx_orcamento_url() ) );
 			exit;
 		}
-		// Dispara e-mail de credenciais do WP
+		$is_new_user = true;
+		// Marca o user pra que o filter vaxx_customize_new_user_email saiba que
+		// o e-mail deve ter copy VAXX em vez do default do WP.
+		update_user_meta( $user_id, '_vaxx_from_orcamento', '1' );
+		// Dispara e-mail de boas-vindas (custom VAXX via filter abaixo)
 		wp_new_user_notification( $user_id, null, 'user' );
+		error_log( "[VAXX][Orçamento] ✓ Novo user #{$user_id} criado · email de boas-vindas enviado pra {$email}" );
+	} else {
+		error_log( "[VAXX][Orçamento] User #{$user_id} já existia (e-mail {$email}) — reusa conta." );
 	}
 
 	// 2. Atualiza meta/billing do customer
@@ -792,3 +801,114 @@ add_filter( 'woocommerce_get_order_status_name', function( $name, $order = null 
 	if ( $name === 'wc-orcamento' || $name === 'orcamento' ) return 'Orçamento';
 	return $name;
 }, 10, 2 );
+
+/**
+ * Customiza o e-mail de boas-vindas (criação de conta) com copy +
+ * visual VAXX quando o user foi criado pelo fluxo de orçamento.
+ * Envia HTML (multipart) com cores e tipografia da marca.
+ */
+add_filter( 'wp_new_user_notification_email', function( $email_data, $user, $blogname ) {
+	if ( ! get_user_meta( $user->ID, '_vaxx_from_orcamento', true ) ) {
+		return $email_data;
+	}
+
+	$key = get_password_reset_key( $user );
+	if ( is_wp_error( $key ) ) {
+		error_log( '[VAXX][Boas-vindas] Falha get_password_reset_key: ' . $key->get_error_message() );
+		return $email_data;
+	}
+
+	$set_pw_url = network_site_url(
+		"wp-login.php?action=rp&key={$key}&login=" . rawurlencode( $user->user_login ),
+		'login'
+	);
+
+	$first       = $user->first_name ?: $user->display_name;
+	$fantasia    = vaxx_get_option( 'nome_fantasia', 'VAXX' );
+	$cidade      = vaxx_get_option( 'endereco_cidade', 'Jaraguá do Sul / SC' );
+	$razao       = vaxx_get_option( 'razao_social', 'Grupo Delva' );
+	$conta_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/minha-conta/' );
+	$pedidos_url = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'orders' ) : $conta_url;
+	$logo_url    = function_exists( 'get_template_directory_uri' ) ? get_template_directory_uri() . '/assets/svg/logo-vaxx.svg' : '';
+
+	$subject = sprintf( '[%s] Sua conta foi criada · defina sua senha', $fantasia );
+
+	// HTML (cara da marca)
+	$html  = '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' . esc_html( $subject ) . '</title></head>';
+	$html .= '<body style="margin:0;padding:0;background:#0A0A0A;font-family:Arial,Helvetica,sans-serif;color:#FFFFFF;">';
+	$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;">';
+	$html .= '<tr><td align="center" style="padding:32px 16px;">';
+	$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#111111;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">';
+
+	// Header
+	$html .= '<tr><td style="padding:24px 28px;background:#0A0A0A;border-bottom:1px solid rgba(255,255,255,0.08);">';
+	$html .= '<div style="font-family:Arial Black,Arial,sans-serif;font-weight:900;font-size:24px;letter-spacing:0.04em;color:#FFFFFF;text-transform:uppercase;">' . esc_html( $fantasia ) . '</div>';
+	$html .= '<div style="font-size:11px;letter-spacing:0.18em;color:#C8FF00;text-transform:uppercase;font-weight:700;margin-top:4px;">Feito por quem treina · Pra quem treina</div>';
+	$html .= '</td></tr>';
+
+	// Eyebrow + título
+	$html .= '<tr><td style="padding:32px 28px 0;">';
+	$html .= '<div style="font-size:11px;letter-spacing:0.18em;color:#C8FF00;text-transform:uppercase;font-weight:700;">Sua conta foi criada</div>';
+	$html .= '<h1 style="margin:8px 0 16px;font-family:Arial Black,Arial,sans-serif;font-weight:900;font-size:28px;line-height:1.1;text-transform:uppercase;color:#FFFFFF;letter-spacing:-0.01em;">Olá, ' . esc_html( $first ) . '!</h1>';
+	$html .= '<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:rgba(255,255,255,0.78);">Recebemos seu pedido de orçamento e criamos uma conta no site da VAXX pra você acompanhar tudo em um só lugar — propostas, histórico de pedidos e novas solicitações.</p>';
+	$html .= '</td></tr>';
+
+	// CTA Definir senha
+	$html .= '<tr><td style="padding:8px 28px 0;">';
+	$html .= '<p style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,0.78);">Defina sua senha de acesso (link válido por 24h):</p>';
+	$html .= '<table role="presentation" cellpadding="0" cellspacing="0"><tr><td align="center" style="background:#C8FF00;border-radius:999px;">';
+	$html .= '<a href="' . esc_url( $set_pw_url ) . '" style="display:inline-block;padding:14px 28px;font-family:Arial Black,Arial,sans-serif;font-weight:900;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#0A0A0A;text-decoration:none;">Definir minha senha →</a>';
+	$html .= '</td></tr></table>';
+	$html .= '<p style="margin:14px 0 24px;font-size:12px;color:rgba(255,255,255,0.45);">Ou copie e cole no navegador:<br><span style="color:rgba(255,255,255,0.65);word-break:break-all;">' . esc_html( $set_pw_url ) . '</span></p>';
+	$html .= '</td></tr>';
+
+	// Dados da conta
+	$html .= '<tr><td style="padding:0 28px;">';
+	$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;border:1px solid rgba(255,255,255,0.08);border-radius:8px;">';
+	$html .= '<tr><td style="padding:16px 18px;">';
+	$html .= '<div style="font-size:11px;letter-spacing:0.14em;color:rgba(255,255,255,0.55);text-transform:uppercase;font-weight:700;margin-bottom:8px;">Dados da sua conta</div>';
+	$html .= '<div style="font-size:14px;color:rgba(255,255,255,0.82);margin-bottom:4px;"><strong style="color:#FFFFFF;">Usuário:</strong> ' . esc_html( $user->user_login ) . '</div>';
+	$html .= '<div style="font-size:14px;color:rgba(255,255,255,0.82);"><strong style="color:#FFFFFF;">E-mail:</strong> ' . esc_html( $user->user_email ) . '</div>';
+	$html .= '</td></tr></table>';
+	$html .= '</td></tr>';
+
+	// Link pra pedidos
+	$html .= '<tr><td style="padding:24px 28px 0;">';
+	$html .= '<p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,0.78);">Em <strong style="color:#FFFFFF;">Meus Pedidos</strong> você acompanha o status do seu orçamento:</p>';
+	$html .= '<a href="' . esc_url( $pedidos_url ) . '" style="color:#C8FF00;font-size:14px;text-decoration:underline;word-break:break-all;">' . esc_html( $pedidos_url ) . '</a>';
+	$html .= '</td></tr>';
+
+	// Footer
+	$html .= '<tr><td style="padding:32px 28px 28px;border-top:1px solid rgba(255,255,255,0.06);margin-top:24px;">';
+	$html .= '<p style="margin:24px 0 0;font-size:13px;color:rgba(255,255,255,0.78);">Qualquer dúvida, é só responder esse e-mail ou falar com nossa equipe.</p>';
+	$html .= '<p style="margin:16px 0 0;font-size:13px;color:#FFFFFF;font-weight:700;">Abraço,<br>Equipe ' . esc_html( $fantasia ) . '</p>';
+	$html .= '<p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,0.45);">' . esc_html( $razao ) . ' · ' . esc_html( $cidade ) . '</p>';
+	$html .= '</td></tr>';
+
+	$html .= '</table></td></tr></table></body></html>';
+
+	// Plain text fallback (clients que não renderizam HTML)
+	$plain  = "Olá {$first},\n\n";
+	$plain .= "Recebemos seu pedido de orçamento e criamos uma conta no site da VAXX pra você acompanhar tudo em um só lugar.\n\n";
+	$plain .= "▶ Defina sua senha (link válido 24h):\n{$set_pw_url}\n\n";
+	$plain .= "Usuário: {$user->user_login}\n";
+	$plain .= "E-mail: {$user->user_email}\n\n";
+	$plain .= "Meus Pedidos: {$pedidos_url}\n\n";
+	$plain .= "Equipe {$fantasia} · {$razao} · {$cidade}\n";
+
+	$email_data['subject'] = $subject;
+	$email_data['message'] = $html;
+	$email_data['headers'] = isset( $email_data['headers'] ) ? (array) $email_data['headers'] : array();
+	// Garante Content-Type HTML (mantém qualquer header já existente)
+	$has_ct = false;
+	foreach ( (array) $email_data['headers'] as $h ) {
+		if ( stripos( $h, 'content-type' ) === 0 ) { $has_ct = true; break; }
+	}
+	if ( ! $has_ct ) {
+		$email_data['headers'][] = 'Content-Type: text/html; charset=UTF-8';
+	}
+
+	error_log( "[VAXX][Boas-vindas] ✓ E-mail HTML customizado para user #{$user->ID} ({$user->user_email})" );
+
+	return $email_data;
+}, 10, 3 );
