@@ -28,6 +28,53 @@ function vaxx_replace_star_with_svg( $content ) {
 add_filter( 'the_content', 'vaxx_replace_star_with_svg', 20 );
 
 /**
+ * Remove referências à altura do Valdir (1,60 m) — informação descontinuada
+ * da narrativa de marca. Filtra qualquer conteúdo vindo do post_content,
+ * pra não precisar editar página a página no admin.
+ *
+ * Cobre:
+ *   - "Altura do Valdir 1,60 M" / "Altura do Valdir · 1,60 m" / variações
+ *   - Blocos com label "ALTURA DO VALDIR" e stat "1,60 M" lado a lado
+ *   - Frases tipo "Valdir tem 1,60" (apenas a menção da altura — frase
+ *     reescrita pra não citar o número)
+ *   - "1,60 m" / "1.60 m" soltos
+ */
+function vaxx_strip_valdir_altura( $content ) {
+	if ( strpos( $content, '1,60' ) === false && strpos( $content, '1.60' ) === false && stripos( $content, 'altura do valdir' ) === false ) {
+		return $content;
+	}
+
+	// 1. Remove blocos HTML cujo único propósito é mostrar "altura do valdir / 1,60 m" (label + stat juntos)
+	//    Cobre estruturas comuns: <div class="...stat..."> ... ALTURA ... 1,60 M ... </div>
+	$content = preg_replace(
+		'#<(div|section|article|figure|aside|li)([^>]*)>(?:(?!</\1>).)*?(?:Altura do Valdir|ALTURA DO VALDIR)(?:(?!</\1>).)*?1[,.]60(?:(?!</\1>).)*?</\1>\s*#is',
+		'',
+		$content
+	);
+
+	// 2. Remove a frase "Altura do Valdir: 1,60 M" e variações em texto corrido
+	$content = preg_replace(
+		'/Altura\s+do\s+Valdir[\s:·\-—]*1[,.]60\s*[mM]?[\.\s]*/i',
+		'',
+		$content
+	);
+
+	// 3. Reescreve "Valdir tem 1,60 [m]" pra "Valdir nunca encontrou regulagem que servisse a ele"
+	//    (preserva a história sem citar a altura)
+	$content = preg_replace(
+		'/(o\s+)?Valdir\s+(?:tem|tinha)\s+1[,.]60\s*[mM]?(?:etros|\s+de\s+altura)?\s*[.,]?\s*/i',
+		'',
+		$content
+	);
+
+	// 4. Remove ocorrências soltas de "1,60 m" / "1.60 m" / "1,60 M"
+	$content = preg_replace( '/\b1[,.]60\s*[mM]\b\.?\s*/u', '', $content );
+
+	return $content;
+}
+add_filter( 'the_content', 'vaxx_strip_valdir_altura', 25 );
+
+/**
  * Mapa canônico de páginas que recebem breadcrumb injetada.
  * slug → label final do bc.
  */
