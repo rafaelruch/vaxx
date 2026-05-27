@@ -230,11 +230,73 @@ function vaxx_shortcode_header() {
 				</a>
 				<?php endif; ?>
 
-				<button class="header__menu-toggle" aria-label="Abrir menu mobile">
+				<button class="header__menu-toggle" id="mobileMenuToggle" aria-label="Abrir menu mobile" aria-expanded="false" aria-controls="mobileMenu">
 					<span></span><span></span><span></span>
 				</button>
 			</div>
 		</div>
+
+		<!-- ─── Drawer mobile ─── -->
+		<div class="mobile-menu-overlay" id="mobileMenuOverlay" aria-hidden="true"></div>
+		<aside class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menu de navegação" aria-hidden="true" tabindex="-1">
+			<header class="mobile-menu__header">
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="mobile-menu__logo" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> — início">
+					<?php echo vaxx_logo_html(); ?>
+				</a>
+				<button type="button" class="mobile-menu__close" id="mobileMenuClose" aria-label="Fechar menu">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+						<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+					</svg>
+				</button>
+			</header>
+
+			<nav class="mobile-menu__nav" aria-label="Principal">
+				<ul class="mobile-menu__list">
+					<li><a href="<?php echo esc_url( home_url( '/quem-somos/' ) ); ?>">Quem Somos</a></li>
+					<li><a href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) ); ?>">Produtos</a></li>
+				</ul>
+
+				<?php if ( ! empty( $linhas ) ) : ?>
+				<div class="mobile-menu__section">
+					<h3 class="mobile-menu__section-title">Linhas</h3>
+					<ul class="mobile-menu__sublist">
+						<?php foreach ( $linhas as $linha ) : ?>
+							<li><a href="<?php echo esc_url( get_term_link( $linha ) ); ?>"><?php echo esc_html( $linha->name ); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( ! empty( $grupos ) ) : ?>
+				<div class="mobile-menu__section">
+					<h3 class="mobile-menu__section-title">Grupo Muscular</h3>
+					<div class="mobile-menu__chips">
+						<?php foreach ( $grupos as $grupo ) : ?>
+							<a href="<?php echo esc_url( get_term_link( $grupo ) ); ?>" class="mobile-menu__chip"><?php echo esc_html( $grupo->name ); ?></a>
+						<?php endforeach; ?>
+					</div>
+				</div>
+				<?php endif; ?>
+
+				<ul class="mobile-menu__list mobile-menu__list--secondary">
+					<li><a href="<?php echo esc_url( home_url( '/para-academias/' ) ); ?>">Para Academias</a></li>
+					<li><a href="<?php echo esc_url( home_url( '/revendedores/' ) ); ?>">Revendedores</a></li>
+					<li><a href="<?php echo esc_url( home_url( '/contato/' ) ); ?>">Contato</a></li>
+					<?php if ( class_exists( 'WooCommerce' ) ) : ?>
+					<li><a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>"><?php echo is_user_logged_in() ? 'Minha conta' : 'Entrar / criar conta'; ?></a></li>
+					<?php endif; ?>
+				</ul>
+			</nav>
+
+			<?php if ( $wa_link ) : ?>
+			<footer class="mobile-menu__footer">
+				<a href="<?php echo esc_url( $wa_link ); ?>" target="_blank" rel="noopener" class="mobile-menu__cta">
+					<span class="mobile-menu__cta-pulse"></span>
+					<?php echo esc_html( $cta_longo ); ?>
+				</a>
+			</footer>
+			<?php endif; ?>
+		</aside>
 
 		<div class="search-overlay" id="searchOverlay" role="dialog" aria-modal="true" aria-label="Buscar produtos" hidden>
 			<button type="button" class="search-overlay__close" aria-label="Fechar busca">

@@ -679,3 +679,55 @@
     }
   });
 })();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Mobile menu drawer · toggle/close (click / ESC / overlay / link)
+   ═══════════════════════════════════════════════════════════════ */
+(function () {
+  var toggle  = document.getElementById('mobileMenuToggle');
+  var drawer  = document.getElementById('mobileMenu');
+  var overlay = document.getElementById('mobileMenuOverlay');
+  var closeBtn = document.getElementById('mobileMenuClose');
+  if (!toggle || !drawer || !overlay) return;
+
+  function open() {
+    drawer.classList.add('is-open');
+    overlay.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    overlay.setAttribute('aria-hidden', 'false');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('has-mobile-menu-open');
+    // Foco no botão de fechar pra acessibilidade
+    setTimeout(function () { closeBtn && closeBtn.focus(); }, 50);
+  }
+
+  function close() {
+    drawer.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('aria-hidden', 'true');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('has-mobile-menu-open');
+    toggle.focus();
+  }
+
+  toggle.addEventListener('click', function (e) {
+    e.preventDefault();
+    drawer.classList.contains('is-open') ? close() : open();
+  });
+
+  closeBtn && closeBtn.addEventListener('click', close);
+  overlay.addEventListener('click', close);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+      close();
+    }
+  });
+
+  // Fecha ao clicar em qualquer link interno do drawer
+  drawer.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () { setTimeout(close, 80); });
+  });
+})();
