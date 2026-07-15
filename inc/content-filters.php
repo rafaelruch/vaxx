@@ -6,6 +6,7 @@
  * estar lá:
  *   - ★ (estrela Unicode) → SVG inline (contrato VAXX é "zero emojis em UI")
  *   - Breadcrumb canônico ausente em páginas core (ex: /quem-somos/)
+ *   - Caminho de asset do tema escrito na mão, com o nome da pasta cravado
  *
  * Manter idempotente: cada filtro só age quando detecta a violação.
  *
@@ -13,6 +14,37 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
+
+/**
+ * Reescreve caminho de asset do tema cravado no conteúdo.
+ *
+ * Várias páginas trazem o caminho escrito na mão, com o nome da pasta do tema
+ * dentro (ex: /wp-content/themes/vaxx-theme/assets/video/hero-gym.mp4). A pasta
+ * não tem o mesmo nome em todo ambiente — em produção ela é 'vaxx', no local é
+ * 'vaxx-theme' — então esses caminhos davam 404 em produção: o vídeo do hero
+ * sumia da Home e das páginas de segmento, e o mascote da Quem Somos também.
+ *
+ * Aponta para o tema ativo seja qual for a pasta, e resolve o passado sem
+ * precisar reescrever o conteúdo do banco.
+ */
+function vaxx_corrige_caminho_asset_do_tema( $content ) {
+	if ( false === strpos( $content, '/wp-content/themes/' ) ) {
+		return $content;
+	}
+
+	$uri  = trailingslashit( get_template_directory_uri() );
+	$atual = get_template();
+
+	// Casa com ou sem domínio na frente; ignora quem já aponta pra pasta certa.
+	return preg_replace_callback(
+		'#(?:https?:)?(?://[^/"\'\s]+)?/wp-content/themes/([A-Za-z0-9_-]+)/#',
+		static function ( $m ) use ( $uri, $atual ) {
+			return $m[1] === $atual ? $m[0] : $uri;
+		},
+		$content
+	);
+}
+add_filter( 'the_content', 'vaxx_corrige_caminho_asset_do_tema', 6 );
 
 /**
  * Substitui ocorrências de ★ por SVG inline mantendo cor/tamanho do contexto.
