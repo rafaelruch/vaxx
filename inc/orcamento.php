@@ -155,6 +155,24 @@ add_action( 'template_redirect', function() {
 }, 9 );
 
 /**
+ * O usuário atual pode ver este orçamento?
+ *
+ * Checa posse direto no pedido. Não dá pra usar current_user_can('read_post'),
+ * porque com HPOS ligado o pedido não é um post e a checagem devolve false até
+ * pro próprio dono — o que deixava a tela de obrigado invisível pro cliente.
+ */
+function vaxx_pode_ver_orcamento( $order ) {
+	if ( ! $order ) {
+		return false;
+	}
+	if ( current_user_can( 'manage_woocommerce' ) ) {
+		return true;
+	}
+	$uid = get_current_user_id();
+	return $uid && (int) $order->get_customer_id() === $uid;
+}
+
+/**
  * Shortcode [vaxx_orcamento] — form + resumo do carrinho.
  * Se houver ?orcamento=<id> na URL, renderiza tela de confirmação.
  */
@@ -165,7 +183,7 @@ function vaxx_shortcode_orcamento() {
 	if ( isset( $_GET['orcamento'] ) ) {
 		$order_id = absint( $_GET['orcamento'] );
 		$order = $order_id ? wc_get_order( $order_id ) : null;
-		if ( $order && current_user_can( 'read_post', $order_id ) ) {
+		if ( vaxx_pode_ver_orcamento( $order ) ) {
 			return vaxx_render_orcamento_thanks( $order );
 		}
 	}

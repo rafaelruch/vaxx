@@ -1771,19 +1771,21 @@ body.has-cart-open { overflow: hidden; }
 
 .gallery__main {
   position: relative;
-  aspect-ratio: 4/3;
+  aspect-ratio: 1/1;
   background: var(--vaxx-carvao);
   border-radius: 4px;
   overflow: hidden;
   order: 1;
 }
-@media (min-width: 1024px) { .gallery__main { order: 2; flex: 1; aspect-ratio: 4/3; } }
+@media (min-width: 1024px) { .gallery__main { order: 2; flex: 1; aspect-ratio: 1/1; } }
 
+/* contain: as fotos vêm em retrato e paisagem; cover decepava as máquinas
+   altas (Estação 4 Polias, Crucifixo). O carvão do frame faz o letterbox. */
 .gallery__main img,
 .gallery__main video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   filter: grayscale(12%) contrast(1.05);
   transition: transform 500ms var(--ease);
 }

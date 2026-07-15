@@ -33,9 +33,11 @@ function vaxx_theme_setup() {
 	add_theme_support( 'woocommerce' );
 
 	// Image sizes custom VAXX
+	// Card e galeria sem crop: as fotos de produto vêm em retrato e paisagem,
+	// o enquadramento 1:1 fica a cargo do object-fit: contain no CSS.
 	add_image_size( 'vaxx-prod-thumb',   400, 400, true );
-	add_image_size( 'vaxx-prod-card',    900, 675, true );
-	add_image_size( 'vaxx-prod-gallery', 1600, 1200, true );
+	add_image_size( 'vaxx-prod-card',    900, 900, false );
+	add_image_size( 'vaxx-prod-gallery', 1600, 1600, false );
 	add_image_size( 'vaxx-hero',         1920, 1080, true );
 }
 add_action( 'after_setup_theme', 'vaxx_theme_setup' );
@@ -77,7 +79,8 @@ function vaxx_theme_assets() {
 			wp_enqueue_style( 'vaxx-woo-archive', VAXX_THEME_URI . '/assets/css/woo-archive.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-archive.css' ) );
 		}
 		if ( is_product() ) {
-			wp_enqueue_style( 'vaxx-woo-single', VAXX_THEME_URI . '/assets/css/woo-single.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-single.css' ) );
+			wp_enqueue_style(  'vaxx-woo-single',  VAXX_THEME_URI . '/assets/css/woo-single.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-single.css' ) );
+			wp_enqueue_script( 'vaxx-woo-gallery', VAXX_THEME_URI . '/assets/js/woo-gallery.js',  array(),                vaxx_asset_ver( 'assets/js/woo-gallery.js' ), true );
 		}
 		if ( is_cart() && file_exists( VAXX_THEME_DIR . '/assets/css/woo-cart.css' ) ) {
 			wp_enqueue_style( 'vaxx-woo-cart', VAXX_THEME_URI . '/assets/css/woo-cart.css', array( 'vaxx-global' ), vaxx_asset_ver( 'assets/css/woo-cart.css' ) );
@@ -122,6 +125,7 @@ $vaxx_includes = array(
 	'inc/content-filters.php',   // Sanitiza ★ + injeta breadcrumb canônico + dequeue MP off-checkout
 	'inc/orcamento.php',         // Fluxo de orçamento (substitui checkout de pagamento)
 	'inc/orcamento-uazapi.php',  // Disparo WhatsApp via Uazapi no submit do orçamento
+	'inc/tracking.php',          // Google Ads (gtag) + Meta Pixel (fbq): tag base + conversões
 );
 foreach ( $vaxx_includes as $file ) {
 	$path = VAXX_THEME_DIR . '/' . $file;

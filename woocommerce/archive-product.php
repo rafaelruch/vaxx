@@ -27,12 +27,15 @@ $hero_lede  = $is_tax
 // Conta de produtos na query atual
 $total = wc_get_loop_prop( 'total' );
 
-// Taxonomias ativas pra filtros — ordem canonica
+// Taxonomias ativas pra filtros — ordem canonica.
+// Só entra grupo que tem produto: chip de grupo vazio filtra pra lista em
+// branco e passa a impressão de catálogo quebrado. Quando a fábrica cadastrar
+// um produto do grupo, o chip volta sozinho.
 $muscle_order = array( 'peito', 'costas', 'ombros', 'pernas', 'gluteos', 'bracos', 'core' );
 $muscles      = array();
 foreach ( $muscle_order as $slug ) {
 	$t = get_term_by( 'slug', $slug, 'muscle_group' );
-	if ( $t ) { $muscles[] = $t; }
+	if ( $t && $t->count > 0 ) { $muscles[] = $t; }
 }
 ?>
 

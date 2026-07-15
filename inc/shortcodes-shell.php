@@ -95,19 +95,21 @@ function vaxx_shortcode_header() {
 
 			<nav class="header__nav" role="navigation" aria-label="Principal">
 				<?php
-				// Linhas para o mega menu — ordem canonica (Articulados primeiro)
+				// Linhas para o mega menu — ordem canonica (Articulados primeiro).
+				// Só entra linha com produto: linkar linha vazia joga o visitante
+				// numa vitrine em branco. Volta sozinha quando cadastrarem.
 				$linhas_ordem = array( 'articulados', 'bateria-de-pesos', 'linha-cardio', 'acessorios' );
 				$linhas = array();
 				foreach ( $linhas_ordem as $slug_linha ) {
 					$t = get_term_by( 'slug', $slug_linha, 'product_line' );
-					if ( $t ) { $linhas[] = $t; }
+					if ( $t && $t->count > 0 ) { $linhas[] = $t; }
 				}
-				// Grupos para chips — ordem canonica
+				// Grupos para chips — ordem canonica, mesma regra
 				$grupos_ordem = array( 'peito', 'costas', 'ombros', 'pernas', 'gluteos', 'bracos', 'core' );
 				$grupos = array();
 				foreach ( $grupos_ordem as $slug_g ) {
 					$t = get_term_by( 'slug', $slug_g, 'muscle_group' );
-					if ( $t ) { $grupos[] = $t; }
+					if ( $t && $t->count > 0 ) { $grupos[] = $t; }
 				}
 				// Imagem por linha — pega thumb do primeiro produto cadastrado naquela linha.
 				// Cacheado por 1h pra evitar query repetida em cada render do header.

@@ -198,3 +198,28 @@ function vaxx_remove_mercadopago_print_actions() {
 	}
 }
 add_action( 'wp', 'vaxx_remove_mercadopago_print_actions', 99 );
+
+/**
+ * Redireciona as URLs antigas da vitrine para /produtos/.
+ *
+ * A vitrine já morou em /shop/ e havia links espalhados para /loja/, que nunca
+ * existiu — batiam no arquivo do blog e mostravam o "Hello world!". O conteúdo
+ * já foi corrigido; isto cobre bookmark, link externo e anúncio antigo.
+ */
+function vaxx_redirect_urls_antigas_da_loja() {
+	if ( is_admin() ) {
+		return;
+	}
+
+	$path = trim( wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ) ?: '', '/' );
+	if ( ! in_array( $path, array( 'loja', 'shop' ), true ) ) {
+		return;
+	}
+
+	$destino = wc_get_page_permalink( 'shop' );
+	if ( $destino && untrailingslashit( wp_parse_url( $destino, PHP_URL_PATH ) ) !== '/' . $path ) {
+		wp_safe_redirect( $destino, 301 );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'vaxx_redirect_urls_antigas_da_loja', 1 );

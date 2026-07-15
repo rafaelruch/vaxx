@@ -680,10 +680,12 @@ img, svg { max-width: 100%; display: block; }
 /* Imagem do produto */
 .prod-card__media {
   position: relative;
-  aspect-ratio: 4/3;
+  aspect-ratio: 1/1;
   overflow: hidden;
   background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
 }
+/* cover: o card preenche o box inteiro. As fotos são de estúdio e sobra
+   fundo em cima e embaixo, então o corte 1:1 come backdrop, não máquina. */
 .prod-card__media img {
   width: 100%;
   height: 100%;
